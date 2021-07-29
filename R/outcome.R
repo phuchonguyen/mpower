@@ -11,13 +11,13 @@ OutcomeModel <- function(f, family="gaussian") {
           mutate(!! "y" := !! parse_expr(f)) %>%
           select("y") %>% as.matrix() %>% as.vector()
       }
-    } else if (family == "bernoulli") {
+    } else if (family == "binomial") {
       mf <- function(X) {
         mu <- as.data.frame(X) %>%
-          mutate(!! "y" := !! parse_expr(f)) %>%
-          select("y") %>% as.matrix() %>% as.vector()
-        prob <- 1/(1 + exp(-mu))
-        rbinom(nrow(X), size = 1, prob = prob)
+          mutate(!! "mu" := !! parse_expr(f)) %>%
+          select("mu") %>% as.matrix() %>% as.vector()
+
+        1/(1 + exp(-mu))
       }
     } else {
       stop("Family not implemented")
@@ -67,8 +67,8 @@ geny <- function(y, X) {
 geny.mpower_OutcomeModel <- function(y, X) {
   if (y$family == "gaussian") {
     y$s * y$f(X) + rnorm(nrow(X), 0, y$sigma)
-  } else if (y$family == "bernoulli") {
-    y$f(X)
+  } else if (y$family == "binomial") {
+    rbinom(nrow(X), size = 1, prob = y$f(X))
   } else {
     stop("Family not implemented")
   }

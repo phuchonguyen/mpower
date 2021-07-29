@@ -1,4 +1,4 @@
-#' @importFrom stats coef cov cov2cor model.matrix qnorm qt quantile rbeta rbinom rnorm summary.lm
+#' @importFrom stats coef cov cov2cor model.matrix qnorm qt quantile rbeta rbinom rnorm summary.glm glm
 
 #' @export
 InferenceModel <- function(fun, ...) {
@@ -68,7 +68,9 @@ bkmr_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
   km_time <- Sys.time() - s
   km_pip <- bkmr::ExtractPIPs(km_fit) # by default keeps the second half of all samples
   km_pip <- km_pip[, (ncol(km_pip)/2 + 1):ncol(km_pip)]
-  return(list(pip = km_pip$condPIP,
+  pip <- km_pip$PIP
+  if (is.null(pip)) pip <- km_pip$condPIP
+  return(list(pip = pip,
               group_pip = km_pip$groupPIP,
               time = km_time))  # detect of effect
 }
@@ -154,25 +156,19 @@ qgcomp_lin_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
     colnames(dat) <- c("y", colnames(X), colnames(Z))
   }
   s <- Sys.time()
-  qc.fit <- qgcomp::qgcomp.noboot(y ~ . , data = dat, expnms = colnames(X),
-                                  q = args$q, family = args$family, bayes = args$bayes)
+  qc.fit <- do.call(qgcomp::qgcomp.noboot, c(list(y ~ . , data = dat, expnms = colnames(X)), args))
   qgc_time <- Sys.time() - s
   p <- ncol(X)
   qgc_sig <- rep(qc.fit$pval[2] <= alpha, p)  # p-value of psi1
   # Get CI for each estimate, only available for linear qgcomp
   qc.fit$qx$y = qc.fit$fit$data$y
-  if (args$family$family == "gaussian") {
-    newfit <- stats::lm(y ~ ., data=dat)
-    me <- coef(newfit)[2:(1+p)]
-    sde <- summary.lm(newfit)$coef[,2][2:(1+p)]
-    qgc_beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde,
-                      me,
-                      me + qt(1-alpha/2, nrow(X)-p)*sde)
-    rownames(qgc_beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))
-  } else {
-    warning("beta for none gaussian family not yet implemented")
-    qgc_beta <- NULL
-    }
+  newfit <- do.call(glm, c(list(y ~ ., data=dat), args))
+  me <- coef(newfit)[2:(1+p)]
+  sde <- summary.glm(newfit)$coef[,2][2:(1+p)]
+  qgc_beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde,
+                    me,
+                    me + qt(1-alpha/2, nrow(X)-p)*sde)
+  rownames(qgc_beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))
   return(list(ci = qgc_sig,    # detection  of effect
               pos_psi = qc.fit$pos.psi,
               neg_psi = qc.fit$neg.psi,
@@ -190,17 +186,15 @@ glm_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
     dat <- data.frame(y=y, x=X, z=Z) %>%
       set_colnames(c("y", colnames(X), colnames(Z)))
   }
-  if (args$family == "gaussian") {
-    p <- ncol(X)
-    s <- Sys.time()
-    fit <- stats::lm(y ~ ., data=dat)
-    time <- Sys.time() - s
-    me <- coef(fit)[2:(1+p)]
-    sde <- summary.lm(fit)$coef[,2][2:(1+p)]
-    beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde, me,
-                  me + qt(1-alpha/2, nrow(X)-p)*sde)
-    rownames(beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))
-  } else {stop("None Gaussian family not implemented")}
+  p <- ncol(X)
+  s <- Sys.time()
+  fit <- do.call(glm, c(list(y ~ ., data=dat), args))
+  time <- Sys.time() - s
+  me <- coef(fit)[2:(1+p)]
+  sde <- summary.lm(fit)$coef[,2][2:(1+p)]
+  beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde, me,
+                me + qt(1-alpha/2, nrow(X)-p)*sde)
+  rownames(beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))
   return(list(ci = 1*(beta[1,] > 0 | beta[3,] < 0),
               beta = beta,
               time = time))

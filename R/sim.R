@@ -131,7 +131,7 @@ plot_power_curve <- function(x, crit, var, thres=NULL, digits=3) {
   k <- 1
   for (l in x) {
     n[k] <- l$n
-    s[k] <- l$ymod$sigma
+    s[k] <- l$ymod$rho
     powr[k,] <- summarize_power(object = l, crit = crit, thres = thres, digits = digits)
     k <- k+1
   }
@@ -139,7 +139,7 @@ plot_power_curve <- function(x, crit, var, thres=NULL, digits=3) {
     set_colnames(c("n", "s", x[[1]]$xmod$var_name)) %>%
     mutate(n = as.factor(n)) %>%
     ggplot(aes_string(x = "s", y = var, colour = "n")) + geom_path() + geom_point() +
-    labs(x="Noise standard deviation", y="Type I error rate/ Power") +
+    labs(x="SNR", y="Type I error rate/ Power") +
     scale_colour_discrete(name = "Sample size")
 }
 
