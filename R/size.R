@@ -27,7 +27,7 @@ binomial_de <- function(y, mu, m) {
 }
 
 #' @export
-rsq2snr <- function(x) {
+rsq2snr <- function(r) {
   (1/r - 1)^(-1)
 }
 

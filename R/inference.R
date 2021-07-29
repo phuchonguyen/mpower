@@ -191,7 +191,7 @@ glm_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
   fit <- do.call(glm, c(list(y ~ ., data=dat), args))
   time <- Sys.time() - s
   me <- coef(fit)[2:(1+p)]
-  sde <- summary.lm(fit)$coef[,2][2:(1+p)]
+  sde <- summary.glm(fit)$coef[,2][2:(1+p)]
   beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde, me,
                 me + qt(1-alpha/2, nrow(X)-p)*sde)
   rownames(beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))

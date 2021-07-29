@@ -54,7 +54,6 @@ sim_power <- function(xmod, ymod, imod, s=1000, n=100,
   new_Sim(list(s = s, n = n, alpha = alpha,
                xmod = xmod, ymod = ymod, imod = imod,
                sims = out))
-
 }
 
 new_Sim <- function(x = list()) {
