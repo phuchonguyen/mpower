@@ -26,27 +26,25 @@ sim_power <- function(xmod, ymod, imod, s=1000, n=100,
   }
 
   # run MC sims
-  prog_int <- s %/% 5
+  prog_int <- max(1, s %/% 5)
   if (cores < 2) {
     out <- as.list(rep(NA, s))
     for (i in seq_along(out)) {
+      if (i %% prog_int == 0) log_msg(paste0("Processing ", i," simulations of ", s))
       X <- genx(xmod, n)
       y <- geny(ymod, X)
       out[[i]] <- fit(imod, X, y, alpha)
-      if (i %% prog_int == 0) log_msg(paste0("Processing ", i," simulations of ", s))
     }
   } else {
     # Set up parallel backend to use many processors
     cores <- detectCores()
     cl <- makeCluster(cores[1]-1) #not to overload your computer
     registerDoParallel(cl)
-    socket <- make.socket(port=4000)
     out <- foreach(i = 1:s) %dopar% {
+      if (i %% prog_int == 0) log_msg(paste0("Processing ", i," simulations of ", s))
       X <- genx(xmod, n)
       y <- geny(ymod, X)
       fit(imod, X, y, alpha)
-      if (i %% prog_int == 0) log_msg(paste0("Processing ", i," simulations of ", s),
-                                      dopar = TRUE, socket = socket)
     }
     stopCluster(cl)
   }
@@ -64,6 +62,7 @@ new_Sim <- function(x = list()) {
   structure(x, class = "mpower_Sim")
 }
 
+#' @export
 summarize_power <- function(object, crit, thres=NULL, digits=3) {
   if (crit == "ci") message(paste("For a", 1-object$alpha, "% CI", sep = " "))
   if (!(crit %in% names(object$sims[[1]]))) stop(paste("Criterion", crit, "not implemented for", object$imod$fun_name))

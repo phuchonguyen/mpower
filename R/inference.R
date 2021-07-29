@@ -2,7 +2,6 @@
 
 #' @export
 InferenceModel <- function(fun, ...) {
-  stopifnot(fun %in% c("bma", "bkmr", "ms", "bws", "qgc", "fin"))
   mod <- list("fun_name" = fun, "args" = list(...))
   if (fun == "bma") {
     mod[["fun"]] <- bma_wrapper
@@ -16,6 +15,11 @@ InferenceModel <- function(fun, ...) {
     mod[["fun"]] <- qgcomp_lin_wrapper
   } else if (fun == "fin") {
     mod[["fun"]] <- fin_wrapper
+  } else if (fun == "glm") {
+    mod[["fun"]] <- glm_wrapper
+  } else if (is.function(fun)) {
+    mod[["fun"]] <- fun
+    mod[["fun_name"]] <- "custom"
   } else {
     stop("`fun` not implemented")
   }
@@ -64,7 +68,9 @@ bkmr_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
   km_time <- Sys.time() - s
   km_pip <- bkmr::ExtractPIPs(km_fit) # by default keeps the second half of all samples
   km_pip <- km_pip[, (ncol(km_pip)/2 + 1):ncol(km_pip)]
-  return(list(pip = km_pip, time = km_time))  # detect of effect
+  return(list(pip = km_pip$condPIP,
+              group_pip = km_pip$groupPIP,
+              time = km_time))  # detect of effect
 }
 
 bma_wrapper <- function(y, X, Z=NULL, interact=FALSE, alpha=0.05, args=list()) {
@@ -159,9 +165,10 @@ qgcomp_lin_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
     newfit <- stats::lm(y ~ ., data=dat)
     me <- coef(newfit)[2:(1+p)]
     sde <- summary.lm(newfit)$coef[,2][2:(1+p)]
-    qgc_beta <- rbind(`2.5%` = me - qt(1-alpha/2, nrow(X)-p)*sde,
-                      `50%` = me,
-                      `97.5%` = me + qt(1-alpha/2, nrow(X)-p)*sde)
+    qgc_beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde,
+                      me,
+                      me + qt(1-alpha/2, nrow(X)-p)*sde)
+    rownames(qgc_beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))
   } else {
     warning("beta for none gaussian family not yet implemented")
     qgc_beta <- NULL
@@ -175,6 +182,31 @@ qgcomp_lin_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
               time = qgc_time))
 }
 
+glm_wrapper <- function(y, X, Z=NULL, alpha=0.05, args=list()) {
+  if (is.null(Z)) {
+    dat <- data.frame(y=y, x=X) %>%
+      set_colnames(c("y", colnames(X)))
+  } else {
+    dat <- data.frame(y=y, x=X, z=Z) %>%
+      set_colnames(c("y", colnames(X), colnames(Z)))
+  }
+  if (args$family == "gaussian") {
+    p <- ncol(X)
+    s <- Sys.time()
+    fit <- stats::lm(y ~ ., data=dat)
+    time <- Sys.time() - s
+    me <- coef(fit)[2:(1+p)]
+    sde <- summary.lm(fit)$coef[,2][2:(1+p)]
+    beta <- rbind(me - qt(1-alpha/2, nrow(X)-p)*sde, me,
+                  me + qt(1-alpha/2, nrow(X)-p)*sde)
+    rownames(beta) <- c(paste0(alpha/2, "%"), "50.0%", paste0(1-alpha/2, "%"))
+  } else {stop("None Gaussian family not implemented")}
+  return(list(ci = 1*(beta[1,] > 0 | beta[3,] < 0),
+              beta = beta,
+              time = time))
+}
+
+# TODO: suppress rstan log messages
 bws_wrapper <- function(y, X, Z=NULL, alpha=0.05, args) {
   s <- Sys.time()
   fit <- do.call(bws::bws, c(list(y = y, X = X, Z = Z), args))
