@@ -70,7 +70,7 @@ summarize_power <- function(object, crit, thres=NULL, digits=3) {
     map(function(e) if(!is.null(thres)){e >= thres} else {e}) %>%
     abind(along = -1)
   if (length(dim(temp))==3) {
-      temp %>%
+    temp %>%
       colMeans() %>% round(digits) %>%
       set_colnames(object$xmod$var_name)
   } else if (is.matrix(temp)) {
@@ -131,7 +131,9 @@ plot_power_curve <- function(x, crit, var, thres=NULL, digits=3) {
   for (l in x) {
     n[k] <- l$n
     s[k] <- l$ymod$rho
-    powr[k,] <- summarize_power(object = l, crit = crit, thres = thres, digits = digits)
+    temp <- summarize_power(object = l, crit = crit, thres = thres, digits = digits)
+    if (!is.null(nrow(temp))) temp <- temp[2,]
+    powr[k,] <- temp
     k <- k+1
   }
   data.frame(cbind(n, s, powr)) %>%

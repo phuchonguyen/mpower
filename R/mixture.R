@@ -32,19 +32,11 @@ MixtureModel <- function(..., method = "estimation") {
   }
 
   if (method == "cvine") {
-    if (is.matrix(args$S)) {
-      S <- args$S
-    } else if (length(args$S)==1 & is.numeric(args$p)) {
-      S <- matrix(args$S, nrow = args$p, ncol = args$p)
-      diag(S) <- 1
-    } else {
-      stop("Input `S` is missing or not a numeric matrix", call. = FALSE)
-    }
 
-    if (!all(S <= 1 & S >= -1)) stop("Values in S must be between -1 and 1", call. = FALSE)
+    if (!all(args$S <= 1 & args$S >= -1)) stop("Values in S must be between -1 and 1", call. = FALSE)
     name <- args$var_name
-    if (is.null(name)) name <- colnames(S)
-    if (is.null(name)) name <- paste0("x", 1:ncol(S))
+    if (is.null(name)) name <- colnames(args$S)
+    if (is.null(name)) name <- paste0("x", 1:args$p)
 
     if (is.numeric(args$m) & length(args$m)==1) {
       m <- args$m
@@ -53,7 +45,7 @@ MixtureModel <- function(..., method = "estimation") {
     }
     if (m <= 0) {stop("Input `m` must be positive", call. = FALSE)}
 
-    mod <- new_cvine_MixtureModel(S = S, m = m, name = name)
+    mod <- new_cvine_MixtureModel(S=args$S, m=m, name=name, p=args$p)
   }
 
   validate_MixtureModel(mod)
@@ -104,14 +96,14 @@ new_estimation_MixtureModel <- function(data = numeric(), per = 10e-10, name = c
   structure(x, class = "mpower_estimation_MixtureModel")
 }
 
-new_cvine_MixtureModel <- function(S = numeric(), m = 100, name = character(), per = 10e-10) {
+new_cvine_MixtureModel <- function(S=numeric(), m=100, name=character(), p=numeric(), per=10e-10) {
   stopifnot(is.numeric(S) & is.numeric(m) & is.character(name) & is.numeric(per))
-  R <- cvine(d = ncol(S), S = S, m = m)
+  R <- cvine(d=p, S=S, m=m)
   while (!is_positive_definite(R)) {
-    R <- R + diag(per, ncol(S))
+    R <- R + diag(per, p)
     per <- 10*per
   }
-  x <- list(R = R, S = S, m = m, var_name = name, per = per, p = ncol(R))
+  x <- list(R=R, S=S, m=m, var_name=name, per=per, p=p)
   structure(x, class = "mpower_cvine_MixtureModel")
 }
 
