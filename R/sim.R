@@ -11,7 +11,8 @@
 #' @export
 sim_power <- function(xmod, ymod, imod, s=1000, n=100,
                 sigma=NULL, rho=NULL, alpha=0.05,
-                cores=1, m=5000, file=NULL) {
+                cores=1, m=5000, file=NULL,
+                progress.interval=NULL, errorhandling="remove") {
   # scale effect size
   if (is.null(sigma) & !is.null(rho)) {
     sigma <- scale_sigma(f = ymod$f, rho = rho, xmod = xmod, m = m)$sigma
@@ -26,25 +27,55 @@ sim_power <- function(xmod, ymod, imod, s=1000, n=100,
   }
 
   # run MC sims
-  prog_int <- max(1, s %/% 5)
+  if (is.null(progress.interval)) progress.interval <- max(1, s %/% 10)
   if (cores < 2) {
     out <- as.list(rep(NA, s))
     for (i in seq_along(out)) {
-      if (i %% prog_int == 0) log_msg(paste0("Processing ", i," simulations of ", s))
-      X <- genx(xmod, n)
-      y <- geny(ymod, X)
-      out[[i]] <- fit(imod, X, y, alpha)
+      X <- tryCatch(genx(xmod, n),
+                    error=function(e) {
+                      message(paste("An error while generating X at iter", i, "out of", s))
+                      message(e)
+                      return(NULL)
+                    })
+      y <- tryCatch(geny(ymod, X),
+                    error=function(e) {
+                      message(paste("An error while generating Y at iter", i, "out of", s))
+                      message(e)
+                      return(NULL)
+                    })
+      out[[i]] <- tryCatch(fit(imod, X, y, alpha),
+                           error=function(e) {
+                             message(paste("An error while fitting model at iter", i, "out of", s))
+                             message(e)
+                             return(NULL)
+                           })
+      if (i %% progress.interval == 0) print(paste0("Iteration ", i," out of ", s))
     }
   } else {
     # Set up parallel backend to use many processors
-    cores <- detectCores()
-    cl <- makeCluster(cores[1]-1) #not to overload your computer
+    cores_max <- detectCores()
+    cl <- makeCluster(min(cores_max[1]-1, cores)) #not to overload your computer
     registerDoParallel(cl)
-    out <- foreach(i = 1:s) %dopar% {
-      if (i %% prog_int == 0) log_msg(paste0("Processing ", i," simulations of ", s))
-      X <- genx(xmod, n)
-      y <- geny(ymod, X)
-      fit(imod, X, y, alpha)
+    out <- foreach(i = 1:s, .errorhandling=errorhandling) %dopar% {
+      if (i %% progress.interval == 0) print(paste0("Iteration ", i," out of ", s))
+      X <- tryCatch(genx(xmod, n),
+                    error=function(e) {
+                      message(paste("An error while generating X at iter", i, "out of", s))
+                      message(e)
+                      return(NULL)
+                    })
+      y <- tryCatch(geny(ymod, X),
+                    error=function(e) {
+                      message(paste("An error while generating Y at iter", i, "out of", s))
+                      message(e)
+                      return(NULL)
+                    })
+      tryCatch(fit(imod, X, y, alpha),
+               error=function(e) {
+                 message(paste("An error while fitting model at iter", i, "out of", s))
+                 message(e)
+                 return(NULL)
+               })
     }
     stopCluster(cl)
   }
@@ -111,6 +142,7 @@ sim_curve <- function(xmod, ymod, imod, s=1000, n=100, sigma=1, rho=NULL, alpha=
     for (j in seq_along(sigma)) {
       vnoise <- sigma[j]
       vrho <- rho[j]
+      print(paste("Simulation for n =", n, ", sigma =", sigma, ", rho =", rho))
       powr[[k]] <- sim_power(xmod = xmod, ymod = ymod, imod = imod,
                            s = s, n = nsize,
                            sigma = vnoise, rho = vrho,
