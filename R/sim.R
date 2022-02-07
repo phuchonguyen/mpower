@@ -54,7 +54,8 @@ sim_power <- function(xmod, ymod, imod, s=1000, n=100,
   } else {
     # Set up parallel backend to use many processors
     cores_max <- detectCores()
-    cl <- makeCluster(min(cores_max[1]-1, cores)) #not to overload your computer
+    cl <- makeCluster(min(cores_max[1]-1, cores), #not to overload your computer
+                      outfile="") #print to console
     registerDoParallel(cl)
     out <- foreach(i = 1:s, .errorhandling=errorhandling) %dopar% {
       if (i %% progress.interval == 0) print(paste0("Iteration ", i," out of ", s))
@@ -142,7 +143,7 @@ sim_curve <- function(xmod, ymod, imod, s=1000, n=100, sigma=1, rho=NULL, alpha=
     for (j in seq_along(sigma)) {
       vnoise <- sigma[j]
       vrho <- rho[j]
-      print(paste("Simulation for n =", n, ", sigma =", sigma, ", rho =", rho))
+      print(paste("Simulation", i, j, " for n =", n, ", sigma =", sigma, ", rho =", rho))
       powr[[k]] <- sim_power(xmod = xmod, ymod = ymod, imod = imod,
                            s = s, n = nsize,
                            sigma = vnoise, rho = vrho,
