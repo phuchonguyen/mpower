@@ -30,7 +30,8 @@ Imports:
     tidyselect,
     tidyr,
     sbgcop,
-    generics
+    generics,
+    truncnorm, mvtnorm, fields, bayesSurv
 Remotes: phuchonguyen/bws
 RoxygenNote: 7.1.1
 Depends: 
