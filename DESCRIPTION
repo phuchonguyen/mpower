@@ -25,10 +25,12 @@ Imports:
     tibble,
     ggplot2,
     parallel,
-    doParallel,
+    doSNOW,
     foreach,
     tidyselect,
-    tidyr
+    tidyr,
+    sbgcop,
+    generics
 Remotes: phuchonguyen/bws
 RoxygenNote: 7.1.1
 Depends: 

@@ -1,57 +1,69 @@
-#' @importFrom rlang parse_expr :=
-#' @importFrom dplyr mutate select
-
+#' Outcome generator
+#'
+#' This function creates a generative model of the outcome given a matrix of
+#' predictors.
+#'
+#' @param f A string that describes the relationships between the
+#'   predictors and outcome or a function that takes an input matrix and returns
+#'   a vector of outcome: \eqn{E(y|X) = g(f(X))} where g is a link function
+#'   that depends on the family argument.
+#' @param family A string, "gaussian" or "binomial" for continuous or binary
+#'   outcomes.
+#' @param sigma A number, Gaussian noise standard deviation if applicable.
+#' @return An OutcomeModel object. Attributes: f: mean function, sigma: a number Gaussian
+#'   observation noise, family: a string "gaussian" or "binomial".
 #' @export
-OutcomeModel <- function(f, family="gaussian") {
-  mf <- NULL
+OutcomeModel <- function(f, family = "gaussian", sigma = 1) {
+  mu <- NULL
   if (is.character(f)) {
     if (family == "gaussian") {
-      mf <- function(X) {
+      mu <- function(X) {
         as.data.frame(X) %>%
-          mutate(!! "y" := !! parse_expr(f)) %>%
-          select("y") %>% as.matrix() %>% as.vector()
+          dplyr::mutate(!! "fx" := !! parse_expr(f)) %>%
+          dplyr::select("fx") %>% as.matrix() %>% as.vector()
       }
     } else if (family == "binomial") {
-      mf <- function(X) {
-        mu <- as.data.frame(X) %>%
-          mutate(!! "mu" := !! parse_expr(f)) %>%
-          select("mu") %>% as.matrix() %>% as.vector()
+      mu <- function(X) {
+        fx <- as.data.frame(X) %>%
+          dplyr::mutate(!! "fx" := !! parse_expr(f)) %>%
+          dplyr::select("fx") %>% as.matrix() %>% as.vector()
 
-        1/(1 + exp(-mu))
+        1/(1 + exp(-fx))
       }
     } else {
       stop("Family not implemented")
     }
   } else if (is.function(f)) {
-    mf <- function(X) {
+    mu <- function(X) {
       f(X)
     }
   } else {
-    stop("Argument `f` must be a string or function that returns a vector of outcome")
+    stop("Argument `f` must be a string or function")
   }
-
-  new_OutcomeModel(list(f=mf, s=1, sigma=1, family=family))
-
+  new_OutcomeModel(list(f = mu, sigma = sigma, family = family))
 }
 
-set_value <- function(object, name, value) {
+#' This function updates values in an OutcomeModel object
+#' @param obj An OutcomeModel object
+#' @param name A string for name of the attribute to be changed
+#' @param value An appropriate data type
+set_value <- function(obj, name, value) {
   UseMethod("set_value")
 }
 
-set_value.mpower_OutcomeModel <- function(object, name, value) {
+set_value.mpower_OutcomeModel <- function(obj, name, value) {
   for (i in seq_along(name)) {
-    if (name[i] == "sigma" & value[i] < 0) stop("Noise variance `sigma` must be nonnegative")
-    if (name[i] == "rho" & value[i] < 0) stop("SNR `rho` must be nonnegative")
-    if (name[i] == "s" & value[i] < 0) stop("Mean function scale `s` must be nonnegative")
-    object[[name[i]]] <- value[i]
+    if (name[i] == "sigma" & value[i] < 0) stop("Noise sd must be nonnegative")
+    if (name[i] == "snr" & value[i] < 0) stop("SNR must be nonnegative")
+    obj[[name[i]]] <- value[i]
   }
 
-  object
+  obj
 }
 
-set_value.default <- function(object, name, value) {
+set_value.default <- function(obj, name, value) {
   warning("Not implemented")
-  object
+  obj
 }
 
 new_OutcomeModel <- function(y = list()) {
@@ -60,15 +72,19 @@ new_OutcomeModel <- function(y = list()) {
   structure(y, class = "mpower_OutcomeModel")
 }
 
-geny <- function(y, X) {
+#' Generates a vector of outcomes
+#' @param obj An OutcomeModel object
+#' @param X A matrix of predictors
+#' @export
+geny <- function(obj, X) {
   UseMethod("geny")
 }
 
-geny.mpower_OutcomeModel <- function(y, X) {
-  if (y$family == "gaussian") {
-    y$s * y$f(X) + rnorm(nrow(X), 0, y$sigma)
-  } else if (y$family == "binomial") {
-    rbinom(nrow(X), size = 1, prob = y$f(X))
+geny.mpower_OutcomeModel <- function(obj, X) {
+  if (obj$family == "gaussian") {
+    obj$f(X) + rnorm(nrow(X), 0, obj$sigma)
+  } else if (obj$family == "binomial") {
+    rbinom(nrow(X), size = 1, prob = obj$f(X))
   } else {
     stop("Family not implemented")
   }

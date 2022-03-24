@@ -1,29 +1,19 @@
 #' @export
-estimate_snr <- function(f, xmod, sigma=NULL, m=5000, family="gaussian") {
+estimate_snr <- function(ymod, xmod, m=5000) {
   X <- genx(xmod, n = m)
-  mu <- f(X)
-  if (family == "gaussian" & !is.null(sigma)) {
-    sigma_signal <- sum((mu - mean(mu))^2)/(m-1)
-    return(sigma_signal / sigma)
-  } else if (family == "binomial") {
-    y <- rbinom(length(mu), size = 1, prob = mu)
-    de_noise <- binomial_de(y, mu, 1)
-    de_signal <- binomial_de(y, mean(y), 1) - de_noise
-    return(de_signal / de_noise)
+  mu <- ymod$f(X)
+  if (ymod$family == "gaussian" & !is.null(ymod$sigma)) {
+    sigma_signal <- get_sigma_signal(mu, m, ymod$sigma)
+    return(sigma_signal / ymod$sigma^2)
+  } else if (ymod$family == "binomial") {
+    return(get_de_snr(mu))
   } else if (family == "poisson") {
     s <- n <- 1
-    warning("Not implemented")
+    warning("Poisson not implemented. Returning NA.")
+    return(NA)
   } else {
-    stop("Family not implemented")
+    stop("Family not implemented.")
   }
-}
-
-binomial_de <- function(y, mu, m) {
-  d1 <- y*(log(y) - log(mu))
-  d1 <- ifelse(is.na(d1), 0, d1)
-  d2 <- (m-y)*(log(m-y) - log(m-mu))
-  d2 <- ifelse(is.na(d2), 0, d2)
-  return(2*sum(d1+d2))
 }
 
 #' @export
@@ -32,21 +22,51 @@ rsq2snr <- function(r) {
 }
 
 #' @export
-scale_f <- function(f, rho, sigma, xmod, m=5000, family="gaussian") {
-  if (family != "gaussian") stop("Family not implemented")
+scale_f <- function(snr, ymod, xmod, m=5000) {
+  if (ymod$family != "gaussian") stop("Family not implemented")
   X <- genx(xmod, n = m)
-  mu <- f(X)
-  sigma_signal <- sum((mu - mean(mu))^2)/(m-1)
-  s <- rho * (sigma / sigma_signal)
-  f_new <- function(...) {sqrt(s) * f(...)}
-  return(list(var_signal = sigma_signal, scale_s = sqrt(s)))
+  mu <- ymod$f(X)
+  sigma_signal <- get_sigma_signal(mu, m, ymod$sigma)
+  s <- snr * (ymod$sigma / sigma_signal)
+  f_new <- function(...) {sqrt(s) * ymod$f(...)}
+  return(OutcomeModel(f = f_new, family = ymod$family, sigma = ymod$sigma))
 }
 
 #' @export
-scale_sigma <- function(f, rho, xmod, m=5000, family="gaussian") {
-  if (family != "gaussian") stop("Family not implemented")
+scale_sigma <- function(snr, ymod, xmod, m=5000) {
+  if (ymod$family != "gaussian") stop("Family not implemented")
   X <- genx(xmod, n = m)
-  mu <- f(X)
-  sigma_signal <- sum((mu - mean(mu))^2)/(m-1)
-  return(list(var_signal = sigma_signal, sigma = sqrt(sigma_signal/rho)))
+  mu <- ymod$f(X)
+  sigma_signal <- get_sigma_signal(mu, m, ymod$sigma)
+  return(OutcomeModel(f = ymod$f, family = ymod$family, sigma = sqrt(sigma_signal/snr)))
+}
+
+# TODO: boostrap with 100 samples only
+get_sigma_signal <- function(mu, m, sigma) {
+  statistics <- function(mu, idx) {sum((mu[idx] - mean(mu[idx]))^2)/(m-1)}
+  out <- boot::boot(mu, statistics, R = 200)$t
+  message("Estimated SNR is ", round(mean(out/sigma^2), 4),
+          " with bootstrap s.e. ", round(sd(out/sigma^2), 4))
+  return(mean(out))
+}
+
+get_de_snr <- function(mu) {
+  statistics <- function(mu, idx) {
+    y <- rbinom(length(mu[idx]), size = 1, prob = mu[idx])
+    de_noise <- binomial_de(y, mu[idx], 1)
+    de_signal <- binomial_de(y, mean(y), 1) - de_noise
+    de_signal / de_noise
+  }
+  out <- boot::boot(mu, statistics, R = 100)$t
+  message("Estimated SNR is ", round(mean(out), 4),
+          " with bootstrap s.e. ", round(sd(out), 4))
+  return(mean(out))
+}
+
+binomial_de <- function(y, mu, m) {
+  d1 <- y*(log(y) - log(mu))
+  d1 <- ifelse(is.na(d1), 0, d1)
+  d2 <- (m-y)*(log(m-y) - log(m-mu))
+  d2 <- ifelse(is.na(d2), 0, d2)
+  return(2*sum(d1+d2))
 }
