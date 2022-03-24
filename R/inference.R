@@ -24,8 +24,6 @@ InferenceModel <- function(model, name = NULL, ...) {
       mod[["model"]] <- bma_wrapper
     } else if (model == "bkmr") {
       mod[["model"]] <- bkmr_wrapper
-    } else if (model == "ms") {
-      mod[["model"]] <- mixselect_wrapper
     } else if (model == "bws") {
       message("Estimating the power of detecting the overall effect based on posterior credible interval. Running sim_power() with cores > 1 is recommended.")
       mod[["model"]] <- bws_wrapper
@@ -85,7 +83,6 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
 #'   Ferrari F, Dunson DB (2020). “Identifying main effects and interactions
 #'   among exposuresusing Gaussian processes.”Annals Applied Statistics,14(4),
 #'   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
-#' @export
 mixselect_wrapper <- function(y, x, args=list()) {
   s <- Sys.time()
   ms_out <- do.call(MixSelect, c(list(y = y, X = x), args))
