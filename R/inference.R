@@ -87,6 +87,8 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
 #'   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
 #' @export
 mixselect_wrapper <- function(y, x, args=list()) {
+  y <- matrix(y, length(y), 1)
+  x <- as.matrix(x)
   s <- Sys.time()
   ms_out <- do.call(MixSelect, c(list(y = y, X = x), args))
   ms_time <- Sys.time() - s
@@ -96,13 +98,13 @@ mixselect_wrapper <- function(y, x, args=list()) {
   ms_beta <- (ms_out$beta * ms_out$gamma_beta) > 0 # ms_out$lambda * ms_out$gamma_int)
   ms_beta <- apply(ms_beta, 2, mean, na.rm=T)
   ms_beta <- vapply(ms_beta, function(x) min(x, 1-x), numeric(1))
-  # PIP for linear term, either in linear or interaction
-  ms_beta_pip <- (ms_out$gamma_beta + ms_out$gamma_int) > 0
+  # PIP for linear term from main effect
+  ms_beta_pip <- (ms_out$gamma_beta) > 0 # + ms_out$gamma_int #TODO add this??
   ms_beta_pip <- apply(ms_beta_pip, 2, mean, na.rm=T)
   # PIP for GP term
   ms_gp_pip <- apply(ms_out$gamma_l, 2, mean, na.rm=T)
   # PIP for any term
-  ms_beta_gp_pip <- (ms_out$gamma_beta + ms_out$gamma_int + ms_out$gamma_l) > 0
+  ms_beta_gp_pip <- (ms_out$gamma_beta + ms_out$gamma_l) > 0 # + ms_out$gamma_int
   ms_beta_gp_pip <- apply(ms_beta_gp_pip, 2, mean, na.rm=T)
   names(ms_beta) <- names(ms_beta_pip) <- names(ms_gp_pip) <- names(ms_beta_gp_pip) <- colnames(x)
   return(list(beta = ms_beta,
