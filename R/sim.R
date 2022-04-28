@@ -22,8 +22,8 @@
 #'   output matrices.
 #' @export
 sim_curve <- function(xmod, ymod, imod, s=100, n=100,
-                      cores = 1, file = NULL, errorhandling = "remove",
-                      snr_iter = 10000) {
+                      cores = 1, file = NULL, errorhandling = "stop",
+                      snr_iter = 10000, cluster_export = c()) {
   stopifnot(class(xmod) %in% c("mpower_estimation_MixtureModel",
                                "mpower_cvine_MixtureModel",
                                "mpower_resampling_MixtureModel"))
@@ -45,7 +45,8 @@ sim_curve <- function(xmod, ymod, imod, s=100, n=100,
       print(paste("Simulation for n =", cur_n, "and the", j, "th outcome model"))
       out <- sim_power(xmod = xmod, ymod = cur_ymod, imod = imod,
                        s = s, n = cur_n, snr_iter = snr_iter,
-                       cores = cores, file = cur_file)
+                       cores = cores, file = cur_file, errorhandling = errorhandling,
+                       cluster_export = cluster_export)
       sim_list[[k]] <- out$sims
       ymod_list[[k]] <- out$ymod
       snr_vec[j] <- snr_vec[j] + out$snr
@@ -85,8 +86,8 @@ new_SimCurve <- function(x = list()) {
 #'   samples.
 #' @export
 sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
-                      cores = 1, file = NULL, errorhandling = "remove",
-                      snr_iter = 10000) {
+                      cores = 1, file = NULL, errorhandling = "stop",
+                      snr_iter = 10000, cluster_export = c()) {
   stopifnot(class(xmod) %in% c("mpower_estimation_MixtureModel",
                                "mpower_cvine_MixtureModel",
                                "mpower_resampling_MixtureModel"))
@@ -112,14 +113,11 @@ sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
   } else {
     # Set up parallel backend to use many processors
     cores_max <- parallel::detectCores()
-    cl <- parallel::makeCluster(min(cores_max[1]-1, cores))
+    cl <- snow::makeCluster(min(cores_max[1]-1, cores))
+    snow::clusterExport(cl, c(c("genx", "geny", "fit"), cluster_export))
     doSNOW::registerDoSNOW(cl)
     opts <- list(progress=progress)
-    out <- foreach::foreach(i = 1:s, .errorhandling=errorhandling, .options.snow=opts,
-                            .export = c("genx.mpower_estimation_MixtureModel",
-                                        "genx.mpower_resampling_MixtureModel",
-                                        "genx.mpower_cvine_MixtureModel",
-                                        "geny", "fit.mpower_InferenceModel")) %dopar% {
+    out <- foreach::foreach(i = 1:s, .errorhandling=errorhandling, .options.snow=opts) %dopar% {
       X <- genx(xmod, n)
       y <- geny(ymod, X)
       r <- fit(imod, X, y)
@@ -127,7 +125,7 @@ sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
       if (!is.null(file)) saveRDS(r, file = paste0(file, i, ".rds"))
       return(r)
     }
-    parallel::stopCluster(cl)
+    snow::stopCluster(cl)
   }
   close(pb)
   snr <- estimate_snr(ymod, xmod, m = snr_iter)
@@ -145,8 +143,8 @@ new_Sim <- function(x = list()) {
 
 #' Tabular and graphical summaries of power simulation
 #'
-#' @param sim A Sim or a list of Sim objects, output from [sim_power()] or
-#'   [sim_curve()].
+#' @param sim A Sim or a SimCurve object, output from sim_power() or
+#'   sim_curve().
 #' @param crit A string specifying the significance criteria.
 #' @param thres A number or vector of numbers spefifying the thresholds of
 #'   "significance".
@@ -154,18 +152,14 @@ new_Sim <- function(x = list()) {
 #' @return A data.frame summary of power for each predictor for each
 #'   combination of thresholds, sample size, signal-to-noise ratios.
 #' @export
-summary <- function(sim, crit, thres, digits = 3) {
-  UseMethod("summary")
+summary <- function(sim, crit, thres, digits = 3, how = "greater") {
+  UseMethod("summary", sim)
 }
 
+
+#' @export
 summary.mpower_Sim <- function(sim, crit, thres, digits = 3, how = "greater") {
   if(seq_along(crit) > 1)  stop("Summary limited to one criteria", call. = FALSE)
-  cat("\n\t*** POWER ANALYSIS SUMMARY ***")
-  cat("\nNumber of Monte Carlo simulations:", sim$s)
-  cat("\nNumber of observations in each simulation:", sim$n)
-  cat("\nData generating process estimated SNR:", round(sim$snr,2))
-  cat("\nInference model:", sim$imod$model_name)
-  cat("\nSignificance criterion:", crit)
   if (length(thres) == 1) {
     # For one threshold and one Sim object
     res <- summary_one_sim_one_thres(sim$sims, crit, thres, digits, how, pivot = T)
@@ -174,23 +168,22 @@ summary.mpower_Sim <- function(sim, crit, thres, digits = 3, how = "greater") {
     res <- summary_one_sim_many_thres(sim$sims, crit, thres, digits, how)
   }
   colnames(res) <- c("thres", " ", "power")
-  for (i in 1:length(thres)) {
-    cat("\n\nSignificance threshold: ", thres[i])
-    cat("\n", res %>% dplyr::filter(thres == thres[i]) %>%
+  cat("\n\t*** POWER ANALYSIS SUMMARY ***")
+  cat("\nNumber of Monte Carlo simulations:", sim$s)
+  cat("\nNumber of observations in each simulation:", sim$n)
+  cat("\nData generating process estimated SNR:", round(sim$snr,2))
+  cat("\nInference model:", sim$imod$model_name)
+  cat("\nSignificance criterion:", crit)
+  for (tt in thres) {
+    cat("\n\nSignificance threshold: ", tt)
+    cat("\n", res %>% dplyr::filter(thres == tt) %>%
           dplyr::select(-thres) %>% knitr::kable(), sep="\n")
   }
   return(res)
 }
 
+#' @export
 summary.mpower_SimCurve <- function(sim, crit, thres, digits = 3, how = "greater") {
-  cat("\n\t*** POWER CURVE ANALYSIS SUMMARY ***")
-  cat("\nNumber of Monte Carlo simulations:", sim$s)
-  cat("\nNumber of observations in each simulation:", unique(sim$n))
-  cat("\nData generating process estimated SNR (for each outcome model):",
-      round(unique(sim$snr),2))
-  cat("\nInference model:", sim$imod$model_name)
-  cat("\nSignificance criterion:", crit)
-  cat("\nSignificance threshold: ", thres[1])
   if (length(thres) == 1) {
     # For one threshold and many Sim objects
     res <- summary_many_sim_one_thres(sim$sims, sim$n, sim$snr, crit, thres, digits, how)
@@ -198,8 +191,16 @@ summary.mpower_SimCurve <- function(sim, crit, thres, digits = 3, how = "greater
     warning("Using the first threshold only")
     res <- summary_many_sim_one_thres(sim$sims, sim$n, sim$snr, crit, thres[1], digits, how)
   }
+  cat("\n\t*** POWER CURVE ANALYSIS SUMMARY ***")
+  cat("\nNumber of Monte Carlo simulations:", sim$s)
+  cat("\nNumber of observations in each simulation:", unique(sim$n))
+  cat("\nData generating process estimated SNR (for each outcome model):",
+      round(unique(sim$snr),2))
+  cat("\nInference model:", sim$imod$model_name)
+  cat("\nSignificance criterion:", crit)
+  cat("\nSignificance threshold:", thres[1])
   cat("\n", res %>%
-        dplyr::select(test, power, n, snr, -thres) %>%
+        dplyr::select(tidyselect::all_of(c("test", "power", "n", "snr"))) %>%
         magrittr::set_colnames(c(" ", "power", "n", "snr")) %>%
         knitr::kable(), sep="\n")
   return(res)
@@ -214,14 +215,25 @@ summary_many_sim_one_thres <- function(sim, n, snr, crit, thres, digits, how) {
                             summary_one_sim_one_thres(sim[[i]], crit, thres, digits, how, pivot = F))
   }
   res <- res %>%
-    dplyr::mutate(n = n, snr = round(snr, 3)) %>%
-    tidyr::pivot_longer(-c("n", "snr", "thres"), names_to = "test", values_to = "power")
-  g <- res %>%
-    dplyr::mutate(snr = as.factor(snr)) %>%
-    ggplot(aes_string(x = "n", y = "power", colour = "snr")) + geom_path() + geom_point() +
-    labs(x="Sample size", y="Type I error rate/ Power") +
-    scale_colour_discrete(name = "SNR") +
-    facet_wrap(as.formula("~test"))
+    dplyr::mutate(n = n, snr = round(snr, 2)) %>%
+    tidyr::pivot_longer(cols = -c("n", "snr", "thres"), names_to = "test", values_to = "power")
+  if (length(unique(res$snr)) > 1) {
+    g <- res %>%
+      dplyr::mutate(snr = as.factor(snr)) %>%
+      ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("snr"))) +
+      geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
+      geom_path() + geom_point() +
+      labs(x="Sample size", y="Type I error rate/ Power") +
+      scale_colour_discrete(name = "SNR") +
+      facet_wrap(stats::as.formula("~test"))
+  } else {
+    g <- res %>%
+      ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("test"))) +
+      geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
+      geom_path() + geom_point() +
+      labs(x="Sample size", y="Type I error rate/ Power") +
+      scale_colour_discrete(name = " ")
+  }
   print(g)
   return(res)
 }
@@ -233,7 +245,9 @@ summary_one_sim_many_thres <- function(sim, crit, thres, digits, how) {
                             summary_one_sim_one_thres(sim, crit, thres[i], digits, how, pivot = T))
   }
   g <- res %>%
-    ggplot(aes_string(x = "thres", y = "power", group = "test", color = "test")) +
+    ggplot(aes(x = !! sym("thres"), y = !! sym("power"),
+               group = !! sym("test"), color = !! sym("test"))) +
+    geom_hline(yintercept = 0.8, linetype = 2, colour = "gray") +
     geom_point() + geom_path() +
     labs(y = "Type I error rate/ Power", x = "Significance threshold") +
     scale_colour_discrete(name = "")
@@ -252,7 +266,7 @@ summary_one_sim_one_thres <- function(sim, crit, thres, digits, how, pivot=FALSE
       else {e <= thres}}) %>%
     abind::abind(along = -1) %>%
     tibble::as_tibble() %>%
-    dplyr::summarise(across(everything(), mean)) %>% round(digits) %>%  #TODO: correct colnames???
+    dplyr::summarise(dplyr::across(tidyselect::everything(), mean)) %>% round(digits) %>%  #TODO: correct colnames???
     dplyr::mutate(thres = thres)
   if (pivot) {
     res <- res %>%

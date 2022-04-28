@@ -10,15 +10,7 @@
 #' Reference code: https://stats.stackexchange.com/questions/124538/how-to-generate-a-large-full-rank-random-correlation-matrix-with-some-strong-cor
 #' Nother useful reference: https://www.sciencedirect.com/science/article/pii/S0047259X05000886:
 #'         generates a positive definite correlation matrix
-#' @export
 cvine <- function(d, alpha=10, beta=10, S=NULL, m=100){
-  if (length(S)==1 & is.numeric(d)) {
-    S <- matrix(S, nrow = d, ncol = d)
-    diag(S) <- 1
-  } else {
-    stop("Input `S` is missing or not a numeric matrix", call. = FALSE)
-  }
-
   if (!is.null(S)) P0 <- cor2partial(S)
   P <- matrix(0, d, d)
   R <- diag(1, d, d)
@@ -28,7 +20,7 @@ cvine <- function(d, alpha=10, beta=10, S=NULL, m=100){
         alpha <- m * (P0[k,i]/2 + 0.5)
         beta <- m - alpha
       }
-      P[k,i] <- rbeta(1, alpha, beta)  # sample partial correlation from Beta Distribution
+      P[k,i] <- stats::rbeta(1, alpha, beta)  # sample partial correlation from Beta Distribution
       P[k,i] <- (P[k,i]-0.5)*2         # shift to [-1, 1]
       p <- P[k,i]
       if (k > 1) {
@@ -44,7 +36,6 @@ cvine <- function(d, alpha=10, beta=10, S=NULL, m=100){
   return(R)
 }
 
-#' @export
 cor2partial <- function(r) {
   d <- nrow(r)
   if (d <= 2) return(r)
@@ -62,14 +53,13 @@ cor2partial <- function(r) {
   return(pcor)
 }
 
-#' @export
 partial <- function(r, x, y) {
   rr <- r[c(x, y),][, c(x, y)]
   rx <- 1:length(x)
   ry <- (length(x)+1):(ncol(rr))
   Cx <- rr[rx, rx] - rr[rx, ry] %*% MASS::ginv(rr[ry, ry]) %*% rr[ry, rx]
 
-  return(cov2cor(Cx))
+  return(stats::cov2cor(Cx))
 
 }
 

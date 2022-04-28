@@ -7,7 +7,7 @@ estimate_snr <- function(ymod, xmod, m=5000) {
     return(sigma_signal / ymod$sigma^2)
   } else if (ymod$family == "binomial") {
     return(get_de_snr(mu))
-  } else if (family == "poisson") {
+  } else if (ymod$family == "poisson") {
     s <- n <- 1
     warning("Poisson not implemented. Returning NA.")
     return(NA)
@@ -46,20 +46,20 @@ get_sigma_signal <- function(mu, m, sigma) {
   statistics <- function(mu, idx) {sum((mu[idx] - mean(mu[idx]))^2)/(m-1)}
   out <- boot::boot(mu, statistics, R = 200)$t
   message("Estimated SNR is ", round(mean(out/sigma^2), 4),
-          " with bootstrap s.e. ", round(sd(out/sigma^2), 4))
+          " with bootstrap s.e. ", round(stats::sd(out/sigma^2), 4))
   return(mean(out))
 }
 
 get_de_snr <- function(mu) {
   statistics <- function(mu, idx) {
-    y <- rbinom(length(mu[idx]), size = 1, prob = mu[idx])
+    y <- stats::rbinom(length(mu[idx]), size = 1, prob = mu[idx])
     de_noise <- binomial_de(y, mu[idx], 1)
     de_signal <- binomial_de(y, mean(y), 1) - de_noise
     de_signal / de_noise
   }
   out <- boot::boot(mu, statistics, R = 100)$t
   message("Estimated SNR is ", round(mean(out), 4),
-          " with bootstrap s.e. ", round(sd(out), 4))
+          " with bootstrap s.e. ", round(stats::sd(out), 4))
   return(mean(out))
 }
 

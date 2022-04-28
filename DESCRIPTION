@@ -10,32 +10,35 @@ License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    bws,
-    BMA,
-    MASS,
-    dplyr,
-    magrittr,
-    rlang,
-    rstan,
-    bkmr,
-    infinitefactor,
-    qgcomp,
-    purrr,
     abind,
-    tibble,
-    ggplot2,
-    parallel,
+    boot,
+    dplyr,
     doSNOW,
     foreach,
-    tidyselect,
-    tidyr,
+    ggplot2,
+    MASS,
+    magrittr,
+    parallel,
+    purrr,
+    snow,
     sbgcop,
-    generics
+    rlang,
+    reshape2,
+    tibble,
+    tidyr,
+    tidyselect
 Remotes: phuchonguyen/bws
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)
 Suggests: 
+    BMA,
+    bkmr,
+    bws,
+    infinitefactor,
     knitr,
-    rmarkdown
+    NHANES,
+    qgcomp,
+    rmarkdown,
+    rstan
 VignetteBuilder: knitr

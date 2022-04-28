@@ -5,42 +5,51 @@
 #'
 #' @param f A string that describes the relationships between the
 #'   predictors and outcome or a function that takes an input matrix and returns
-#'   a vector of outcome: \eqn{E(y|X) = g(f(X))} where g is a link function
+#'   a vector of outcome: \eqn{E(y|x) = g(f(x))} where g is a link function
 #'   that depends on the family argument.
-#' @param family A string, "gaussian" or "binomial" for continuous or binary
-#'   outcomes.
+#' @param family A string, "gaussian", "binomial", or "poisson" for continuous,
+#'   binary, or count outcomes.
 #' @param sigma A number, Gaussian noise standard deviation if applicable.
+#' @param f_args A named list of additional arguments to f
 #' @return An OutcomeModel object. Attributes: f: mean function, sigma: a number Gaussian
 #'   observation noise, family: a string "gaussian" or "binomial".
 #' @export
-OutcomeModel <- function(f, family = "gaussian", sigma = 1) {
+OutcomeModel <- function(f, family = "gaussian", sigma = 1, f_args = list()) {
   mu <- NULL
   if (is.character(f)) {
     if (family == "gaussian") {
-      mu <- function(X) {
-        as.data.frame(X) %>%
-          dplyr::mutate(!! "fx" := !! parse_expr(f)) %>%
-          dplyr::select("fx") %>% as.matrix() %>% as.vector()
+      mu <- function(x) {
+        parse_text_to_f(x, f)
       }
     } else if (family == "binomial") {
-      mu <- function(X) {
-        fx <- as.data.frame(X) %>%
-          dplyr::mutate(!! "fx" := !! parse_expr(f)) %>%
-          dplyr::select("fx") %>% as.matrix() %>% as.vector()
+      mu <- function(x) {
+        fx <- parse_text_to_f(x, f)
 
         1/(1 + exp(-fx))
+      }
+    } else if (family == "poisson") {
+      mu <- function(x) {
+        fx <- parse_text_to_f(x, f)
+
+        exp(fx)
       }
     } else {
       stop("Family not implemented")
     }
   } else if (is.function(f)) {
-    mu <- function(X) {
-      f(X)
+    mu <- function(x) {
+      do.call(f, args = c(list(x), f_args))
     }
   } else {
     stop("Argument `f` must be a string or function")
   }
   new_OutcomeModel(list(f = mu, sigma = sigma, family = family))
+}
+
+parse_text_to_f <- function(x, f) {
+  as.data.frame(x) %>%
+    dplyr::mutate(!! "fx" := !! parse_expr(f)) %>%
+    dplyr::select("fx") %>% as.matrix() %>% as.vector()
 }
 
 #' This function updates values in an OutcomeModel object
@@ -74,17 +83,20 @@ new_OutcomeModel <- function(y = list()) {
 
 #' Generates a vector of outcomes
 #' @param obj An OutcomeModel object
-#' @param X A matrix of predictors
+#' @param x A matrix of predictors
 #' @export
-geny <- function(obj, X) {
+geny <- function(obj, x) {
   UseMethod("geny")
 }
 
-geny.mpower_OutcomeModel <- function(obj, X) {
+#' @export
+geny.mpower_OutcomeModel <- function(obj, x) {
   if (obj$family == "gaussian") {
-    obj$f(X) + rnorm(nrow(X), 0, obj$sigma)
+    obj$f(x) + stats::rnorm(nrow(x), 0, obj$sigma)
   } else if (obj$family == "binomial") {
-    rbinom(nrow(X), size = 1, prob = obj$f(X))
+    stats::rbinom(nrow(x), size = 1, prob = obj$f(x))
+  } else if (obj$family == "poisson") {
+    stats::rpois(nrow(x), obj$f(x))
   } else {
     stop("Family not implemented")
   }
