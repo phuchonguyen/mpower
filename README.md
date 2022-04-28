@@ -64,7 +64,7 @@ To do power analysis using Monte Carlo simulations, we’ll need:
     the “significance” criterion, and a common threshold for statistical
     significance is 0.05.
 
-### Power curve
+### Example 1: Power curve
 
 #### Generate predictors with C-vine
 
@@ -156,7 +156,7 @@ curve_df <- mpower::summary(curve , crit = "pval", thres = 0.05, how = "lesser")
     #> |F-test |  0.94| 300| 0.07|
     #> |F-test |  0.29| 300| 0.01|
 
-### Estimate a data generative model from existing data
+### Example 2: Estimate a data generative model from existing data
 
 We can estimate a data generative model for the predictors if we have
 existing data on them. For example, here we use a copy of the NHANES
@@ -178,7 +178,7 @@ nhanes_nona <- nhanes1518 %>%
   filter(complete.cases(.))
 ```
 
-##### Estimate the generative model:
+#### Estimate the generative model:
 
 We use a Bayesian semi-parametric Gaussian copula for this step. See
 more in the R package
@@ -195,7 +195,7 @@ plot(xmod, split=F)$corr
 
 <img src="man/figures/README-est-plot-1.png" width="100%" />
 
-##### Define an outcome model:
+#### Define an outcome model:
 
 ``` r
 ymod <- mpower::OutcomeModel(sigma = 1, family = "gaussian", 
@@ -203,7 +203,7 @@ ymod <- mpower::OutcomeModel(sigma = 1, family = "gaussian",
                      0.3*URXMHH + 0.2*URXMOH + 0.2*URXMHP")
 ```
 
-##### Estimate power using the F-test we define earlier:
+#### Estimate power using the F-test we define earlier:
 
 ``` r
 power <- mpower::sim_power(xmod, ymod, imod, s=1000, n=100, snr_iter=4800,
@@ -227,7 +227,7 @@ power_df <- mpower::summary(power , crit = "pval", thres = 0.05, how = "lesser")
 #> |F-test |     1|
 ```
 
-### Use the built-in inference models
+### Example 3: Use the built-in inference models
 
 #### Resample predictors from NHANES:
 
@@ -498,7 +498,7 @@ temp_df <- summary(bkmr_power, "pip", 0.5, how = "greater")
 #> |Age          |  0.00|
 ```
 
-### Logistic regression example
+### Example 4: Logistic regression example
 
 We show how to work with binary outcome here. See section 5 in our paper
 for more details. Data can be downloaded at:
