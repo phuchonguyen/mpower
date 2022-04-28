@@ -29,7 +29,7 @@ And the development version from [GitHub](https://github.com/phuchonguyen/mpower
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("phuchonguyen/mpower")
+devtools::install_github("phuchonguyen/mpower", ref="sgc")
 ```
 
 ## Tutorial

@@ -32,7 +32,7 @@ And the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("phuchonguyen/mpower")
+devtools::install_github("phuchonguyen/mpower", ref="sgc")
 ```
 
 ## Tutorial
