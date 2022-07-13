@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 mpower.Rproj
-inst/doc
+README_cache
+

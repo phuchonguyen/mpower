@@ -18,40 +18,343 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The package mpower provides a framework for doing power analysis using Monte Carlo simultions that
+This package allows users to conduct power analysis based on Monte Carlo simulations
+in settings in which consideration of the correlations between predictors is important. It runs power analyses given a data generative model and an inference model. It can estimate a data generative model that preserves dependence structures among variables given existing data (continuous, binary, or ordinal) or high-level descriptions of the associations. Users can generate power curves to assess the trade-offs between sample size, effect size, and power of a design.
 
-  - calculates statistical power for a wide range of models.
+This vignette presents tutorials and examples focusing on applications for environmental mixtures when predictors tend to be moderately to highly correlated. It easily interfaces with several existing and newly developed analysis strategies for assessing associations between exposures to mixtures and health outcomes. However, the package is sufficiently general to facilitate power simulations in a wide variety of settings.
     
-  - generates synthetic data with dependence structures of interests.
-    
-  - adjusts "effect size" using the signal-to-noise ratio that is applicable to continuous/discrete outcomes and non-linear conditional mean.
-
 ## Installation
 
-And the development version from [GitHub](https://github.com/) with:
+And the development version from [GitHub](https://github.com/phuchonguyen/mpower) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("phuchonguyen/mpower")
 ```
-## Example
 
-This is a basic example which shows you how to set up power analysis for four correlated predictors, a continuous outcome, and using a linear regression:
+## Tutorial
 
-```{r example}
-library(mpower)
-# create four predictors with pairwise correlations around 0.6
-xmod  <- MixtureModel(S=0.6, m=100, p=4, method="cvine",
-                      var.name=c("x1", "x2", "x3", "x4"))
-ymod  <- OutcomeModel(f="2*x1 + x2")
-imod  <- InferenceModel(fun="glm")
-# run power analysis with 1000 Monte Carlo iterations using two core
-res <- sim_power(s=1000, n=100, sigma=1,
-                xmod=xmod, ymod=ymod, imod=imod, cores=2)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache = TRUE,
+  message = FALSE
+)
 ```
 
-We can now calculate the power from simulation samples:
+```{r setup, results='hide'}
+library(mpower)
+library(dplyr)
+library(magrittr)
+library(tidyselect)
+library(ggplot2)
+```
+
+
+To do power analysis using Monte Carlo simulations, we'll need:
+
+- A generative model for the predictors. The predictors can be correlated and mixed-scaled. Use `MixtureModel()`.
+
+- A generative model for the outcome that describes the "true" relationships between the predictors and outcome. Use `OutcomeModel()`.
+
+- An inference model. Ideally, this would be the same as the generative model for the outcome. However, in practice our model can at best approximate the "true" predictor-outcome relationships. Use `InferenceModel()`.
+
+- A "significance" criterion and threshold for the inference model. For instance, the t-test in a linear regression has its p-value as the "significance" criterion, and a common threshold for statistical significance is 0.05. 
+
+### Example 1: Power curve
+
+#### Generate predictors with C-vine
+
+we can manually specify the joint distribution of the predictors using univariate marginal distributions and a guess of the correlation matrix. To create four moderately associated mixed-scaled predictors:
+
+```{r cvine-xmod, results='hide', fig.keep='all'}
+G <- diag(1, 4)
+G[upper.tri(G)] <- 0.6
+G[lower.tri(G)] <- 0.6
+xmod <- mpower::MixtureModel(method = "cvine", G = G, m = 50, 
+    cvine_marginals = list(binary = "qbinom(size=1, prob=0.2)", 
+                           count = "qpois(lambda = 1)",
+                           ordinal = "qmultinom(probs=c(0.6, 0.2, 0.2))",
+                           categorical = "qmultinom(probs=c(0.6, 0.2, 0.2))"),
+    cvine_dtypes = list(categorical = "factor"))
+mpower::mplot(xmod)
+```
+
+#### Define outcome models
+
+Since we want to create a power curve, we need to supply a list of outcome models with different effect sizes:
+
+```{r list-ymod}
+ymod_list <- list(
+  mpower::OutcomeModel(f = "1*binary + 1*I(categorical==1)", sigma = 1, family = "gaussian"),
+  mpower::OutcomeModel(f = "0.5*binary + 0.5*I(categorical==1)", sigma = 1, family = "gaussian"),
+  mpower::OutcomeModel(f = "0.2*binary + 0.2*I(categorical==1)", sigma = 1, family = "gaussian")
+  )
+```
+
+#### Custom inference model
+
+We define an overall F-test for linear regression as the inference model and the p-value as the "significance" criterion:
+
+```{r ftest-imod}
+# Define the ftest that returns a list of significance criteria
+ftest <- function(y, x) {
+  dat <- as.data.frame(cbind(y, x))
+  lm_mod <- lm(y ~ ., data = dat)
+  fstat <- summary.lm(lm_mod)$fstat
+  fpval <- pf(fstat[1], fstat[2], fstat[3], lower.tail=F)
+  names(fpval) <- "F-test"
+  return(list(pval = fpval))
+}
+# define an InferenceModel using the F-test
+imod <- mpower::InferenceModel(model = ftest, name = "F-test")
+```
+
+#### Run power analysis
+
+We run power analysis for sample sizes 100 and 300 with 3 cores and 100 Monte Carlo simulations:
+
+```{r cvine-curve, results='hide', fig.keep='all'}
+curve <- mpower::sim_curve(xmod, ymod_list, imod, s = 100, 
+                   n = c(100, 300), cores = 3)
+```
+
+We can get a table of summaries and a plot of the power:
+
+```{r curve-summary}
+curve_df <- mpower::summary(curve , crit = "pval", thres = 0.05, how = "lesser")
+```
+
+### Example 2: Estimate a data generative model from existing data
+
+We can estimate a data generative model for the predictors if we have existing data on them. For example, here we use a copy of the NHANES data from the 2015-2016 and 2017-2018 cycles.
+
+For an estimation model, all data must be in numeric form. Categorical variables should be converted to factors with numeric categories:
+
+```{r edit-nhanes1518}
+data("nhanes1518")
+# preprocessing step 
+phthalates_names <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP",
+         "URXMBP", "URXMC1", "URXMCOH", "URXMEP", "URXMHBP", "URXMHH",
+         "URXMHNC", "URXMHP", "URXMIB", "URXMNP", "URXMOH", "URXMZP")
+covariates_names <- c("RIDAGEYR","INDHHIN2","BMXBMI","RIAGENDR")
+# Get set of complete data only. Remaining 4800 obs.
+nhanes_nona <- nhanes1518 %>%
+  select(all_of(c(phthalates_names, covariates_names))) %>%
+  filter(complete.cases(.))
+```
+
+#### Estimate the generative model:
+
+We use a Bayesian semi-parametric Gaussian copula for this step. See more in the R package `sbgcop`.
+
+```{r est-xmod, echo=T, cache=T, results='hide', fig.keep='all'}
+xmod <- mpower::MixtureModel(method = "estimation" , data = nhanes_nona, 
+    sbg_args = list(nsamp = 1000))
+```
+
+```{r est-mplot}
+mplot(xmod, split=F)$corr
+```
+
+
+#### Define an outcome model:
+
+```{r est-ymod}
+ymod <- mpower::OutcomeModel(sigma = 1, family = "gaussian", 
+                     f = "0.5*RIDAGEYR + 0.3*I(RIAGENDR==1) +
+                     0.3*URXMHH + 0.2*URXMOH + 0.2*URXMHP")
+```
+
+#### Estimate power using the F-test we define earlier:
+
+```{r est-power, results='hide', fig.keep='all'}
+power <- mpower::sim_power(xmod, ymod, imod, s=1000, n=100, snr_iter=4800,
+                   cores = 3, errorhandling = "stop")
+```
+
+```{r est-summary}
+power_df <- mpower::summary(power , crit = "pval", thres = 0.05, how = "lesser")
+```
+
+
+### Example 3: Use the built-in inference models
+
+#### Resample predictors from NHANES:
+
+In this example, we generate predictors by resampling of a large existing dataset. We load data from the R package NHANES and treat ordinal Education and HHIncome as continuous variables.
+
+```{r resamp-xmod}
+library(NHANES)
+data("NHANES")
+nhanes_demo <- NHANES %>%
+  select(BMI, Education, HHIncome, HomeOwn, Poverty, Age) %>%
+  filter(complete.cases(.)) %>%
+  mutate(Education = case_when(Education == "8th Grade" ~ 1,
+                               Education == "9 - 11th Grade" ~ 2,
+                               Education == "High School" ~ 3,
+                               Education == "Some College" ~ 4,
+                               Education == "College Grad" ~ 5),
+         HHIncome = case_when(HHIncome == "more 99999" ~ 12,
+                              HHIncome == "75000-99999" ~ 11,
+                              HHIncome == "65000-74999" ~ 10,
+                              HHIncome == "55000-64999" ~ 9,
+                              HHIncome == "45000-54999" ~ 8,
+                              HHIncome == "35000-44999" ~ 7,
+                              HHIncome == "25000-34999" ~ 6,
+                              HHIncome == "20000-24999" ~ 5,
+                              HHIncome == "15000-19999" ~ 4,
+                              HHIncome == "10000-14999" ~ 3,
+                              HHIncome == " 5000-9999" ~ 2,
+                              HHIncome == " 0-4999" ~ 1))
+xmod <- mpower::MixtureModel(method = "resampling", data = nhanes_demo %>% select(- BMI))
+```
+
+#### Define the outcome model with a fitted model
+
+We can generate outcomes from a previously fitted model. 
+
+```{r resamp-ymod}
+lm_demo <- lm(BMI ~ Poverty*(poly(Age, 2) + HHIncome + HomeOwn + Education), data = nhanes_demo)
+# wrapper function that takes a data frame x and returns a vector of outcome
+f_demo <- function(x) {
+  predict.lm(lm_demo, newdata = x)
+}
+ymod <- mpower::OutcomeModel(f = f_demo, family = "gaussian", 
+    sigma = sigma(lm_demo))
+```
+
+#### Use the built-in glm model
+
+We need to give glm the family and formula inputs. See documentation of glm for more options.
+
+```{r resamp-imod}
+# pass the formula argument to glm()
+imod <- mpower::InferenceModel(model = "glm", family = "gaussian", 
+    formula = y ~ Poverty*(poly(Age, 2) + HHIncome + HomeOwn + Education))
+```
+
+The model `lm_demo` is defined in the global environment, outside the scope of the parallel processes. We need to pass `"lm_demo"` to the `cluster_export` argument to make sure the variable is defined while using parallelism.
+
+```{r resamp-curve, results='hide', fig.keep='all'}
+curve <- mpower::sim_curve(xmod, ymod, imod, 
+    s = 200, n = seq(1000, 5000, 1000), 
+    cores = 4, errorhandling = "remove", snr_iter = 5000,
+    cluster_export = c("lm_demo"))
+```
+
+```{r resamp-summary}
+curve_df <- mpower::summary(curve, crit = "pval", thres = 0.05, how = "lesser")
+```
+
+
+#### Usage of other built-in inference models
+
+Here are examples of how to use other inference models included in the package.
+
+###### Bayesian weighted sums
+
+"Significant" is when the credible intervals don't include zero. We access the 95\% credible interval coverage with criterion "beta" and threshold 0.05.
+
+```{r bws-test, results='hide', fig.keep='all', eval=F}
+bws_imod <- mpower::InferenceModel(model = "bws", iter = 2000, family = "gaussian", refresh = 0)
+bws_power <- mpower::sim_power(xmod, ymod, bws_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo"))
+```
+
+```{r, include=F, eval=F}
+temp_df <- summary(bws_power, crit="beta", thres=0.05, how = "lesser")
+```
+
+###### Quantile G-computation
+
+Similar to BWS but is a frequentist method. The significance criterion is the p-value.
+ 
+```{r qg-test, results='hide', fig.keep='all', eval=F}
+qgcomp_imod <- mpower::InferenceModel(model="qgc")
+qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
+```
+
+```{r, include=F, eval=F}
+temp_df <- summary(qg_power, "pval", 0.05, how = "lesser")
+```
+
+###### Bayesian factor analysis with interactions
+
+```{r fin-test, results='hide', fig.keep='all', eval=F}
+fin_imod <- InferenceModel(model="fin", nrun = 2000, verbose=F)
+fin_power <- sim_power(xmod, ymod, fin_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
+```
+
+```{r, include=F, eval=F}
+temp_df <- summary(fin_power, "beta", 0.05, how = "lesser")
+```
+
+###### Bayesian model averaging
+
+```{r bma-test, results='hide', fig.keep='all', eval=F}
+bma_imod <- InferenceModel(model="bma", glm.family = "gaussian")
+bma_power <- sim_power(xmod, ymod, bma_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
+```
+
+```{r, include=F, eval=F}
+temp_df <- summary(bma_power, "pip", 0.5, how = "greater")
+```
+
+###### Bayesian kernel machine regression
+
+```{r bkmr-test, results='hide', fig.keep='all', eval=F}
+bkmr_imod <- InferenceModel(model = "bkmr", iter = 5000, verbose = F)
+bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
+```
+
+```{r, include=F, eval=F}
+temp_df <- summary(bkmr_power, "pip", 0.5, how = "greater")
+```
+
+```{r, include=F, eval=F}
+ms_imod <- InferenceModel(model = "ms", nrun = 5000, verbose=F)
+ms_power <- sim_power(xmod, ymod, ms_imod, s = 100, n = 100, 
+                       cores=3, snr_iter=1000, errorhandling = "stop")
+temp_df <- summary(ms_power, "pip", 0.5, how = "greater")
+```
+
+### Example 4: Logistic regression example
+
+We show how to work with binary outcome here. See section 5 in our paper for more details. Data can be downloaded at: ttps://ehjournal.biomedcentral.com/articles/10.1186/s12940-020-00642-6
+
+```{r, include=F}
+data("nhanes")
+```
+
+
+```{r logit-xmod, results='hide', fig.keep='all'}
+chems <- c("UrinaryBisphenolA", "UrinaryBenzophenone3", "Methylparaben", "Propylparaben", "dichlorophenol25", "dichlorophenol24", "MBzP", "MEP", "MiBP")
+chems_mod <- mpower::MixtureModel(nhanes[, chems], method = "estimation")
+bmi_mod <- mpower::OutcomeModel(f = "0.14*dichlorophenol25 + 0.15*MEP + 0.05*MEP*Methylparaben", family = "binomial")
+logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
+logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
+                 s=50, n=2000,cores=2)
+```
 
 ```{r}
-summarize_power(res, crit = "ci")
+logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 ```
+
+
+
+
+
+
+
+
+
+
+
+

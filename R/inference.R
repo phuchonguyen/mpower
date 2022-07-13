@@ -21,21 +21,40 @@ InferenceModel <- function(model, name = NULL, ...) {
     mod[["model_name"]] <- name
   } else if (is.character(model)) {
     if (model == "bma") {
+      if (!requireNamespace("BMA")) {
+        stop("Package BMA not installed.")
+      }
       mod[["model"]] <- bma_wrapper
     } else if (model == "bkmr") {
+      if (!requireNamespace("bkmr")) {
+        stop("Package bkmr not installed.")
+      }
       mod[["model"]] <- bkmr_wrapper
-    } else if (model == "ms") {
-      mod[["model"]] <- mixselect_wrapper
     } else if (model == "bws") {
+      if (!requireNamespace("bws")) {
+        stop("Package bws not installed. Install at devtools::install_github('phuchonguyen/bws')")
+      }
       message("Estimating the power of detecting the overall effect based on posterior credible interval. Running sim_power() with cores > 1 is recommended.")
       mod[["model"]] <- bws_wrapper
     } else if (model == "qgc") {
+      if (!requireNamespace("qgcomp")) {
+        stop("Package qgcomp not installed.")
+      }
       mod[["model"]] <- qgcomp_lin_wrapper
     } else if (model == "fin") {
+      if (!requireNamespace("infinitefactor")) {
+        stop("Package infinitefactor not installed.")
+      }
       mod[["model"]] <- fin_wrapper
     } else if (model == "glm") {
       message("Estimating the power of conditional t-test on each regression coefficient.")
       mod[["model"]] <- glm_wrapper
+    } else if (model == "ms") {
+      if (!(requireNamespace("bayesSurv") & requireNamespace("mvtnorm")
+            & requireNamespace("truncnorm") & requireNamespace("fields"))) {
+        stop("At least one of packages bayesSurv, mvtnorm, truncnorm, or fields is not installed.")
+      }
+      mod[["model"]] <- mixselect_wrapper
     } else {
       stop("`model` not implemented")
     }
@@ -58,7 +77,7 @@ fit <- function(mod, x, y) {
   UseMethod("fit")
 }
 
-
+#' @export
 fit.mpower_InferenceModel <- function(mod, x, y) {
   if (length(mod$args) == 0) {
     return(mod$model(y = y, x = x))
@@ -85,7 +104,6 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
 #'   Ferrari F, Dunson DB (2020). “Identifying main effects and interactions
 #'   among exposuresusing Gaussian processes.”Annals Applied Statistics,14(4),
 #'   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
-#' @export
 mixselect_wrapper <- function(y, x, args=list()) {
   y <- matrix(y, length(y), 1)
   x <- as.matrix(x)
@@ -134,6 +152,7 @@ mixselect_wrapper <- function(y, x, args=list()) {
 #' @export
 bkmr_wrapper <- function(y, x, args=list()) {
   args[["varsel"]] <- TRUE
+  x <- stats::model.matrix(~. -1, x)
   s <- Sys.time()
   km_fit <- do.call(bkmr::kmbayes, c(list(y=y, Z=x), args))
   km_time <- Sys.time() - s
@@ -167,12 +186,13 @@ bkmr_wrapper <- function(y, x, args=list()) {
 #'   modelaveraging.  R package version 3.18.15.
 #' @export
 bma_wrapper <- function(y, x, args=list()) {
+  x <- stats::model.matrix(~., x)[,-1]  # full rank matrix with dummy variables
   s <- Sys.time()
   bma_out <- do.call(BMA::bic.glm, c(list(x=x, y=y), args))
   bma_time <- Sys.time() - s
   p <- ncol(x) # Model-averaged coef, the first one is the intercept term
   # Posterior prob. of being less than zero.
-  bma_zero <- pnorm(0, bma_out$postmean[2:(p+1)], bma_out$postsd[2:(p+1)])
+  bma_zero <- stats::pnorm(0, bma_out$postmean[2:(p+1)], bma_out$postsd[2:(p+1)])
   bma_zero <- vapply(bma_zero, function(x) min(x, 1-x), numeric(1))
   # Sum inclusion probability postprob of all models with a main effec Xi
   bma_pip <- bma_out$probne0
@@ -202,7 +222,7 @@ bma_wrapper <- function(y, x, args=list()) {
 #' @export
 fin_wrapper <- function(y, x, args=list(nrun = 2000)) {
   y <- matrix(y, length(y), 1)
-  x <- as.matrix(x)
+  x <- stats::model.matrix(~. -1, x)
   if (!is.null(args$z)) warning("Inclusion of linear effects for covariates not implemented in package infinitefactor for FIN")
   s <- Sys.time()
   fin_out <- do.call(infinitefactor::interactionDL, c(list(y = y, X = x), args))
@@ -215,7 +235,7 @@ fin_wrapper <- function(y, x, args=list(nrun = 2000)) {
   fin_int <- vapply(fin_int, function(x) min(x, 1-x), numeric(1))
   p <- ncol(x)
   names(fin_int) <- paste0(rep(1:p, each = p), rep(1:p, p))
-  fin_int <- fin_int[c(paste0(1:p, 1:p), combn(1:p, m = 2, FUN = paste0,
+  fin_int <- fin_int[c(paste0(1:p, 1:p), utils::combn(1:p, m = 2, FUN = paste0,
                                                  collapse = ""))]
   # Significance of a variable: either main effect or interaction is significant
   fin_zero <- rep(NA, p)
@@ -273,14 +293,29 @@ qgcomp_lin_wrapper <- function(y, x, args=list()) {
 #' }
 #' @export
 glm_wrapper <- function(y, x, args=list()) {
+  if (is.null(args[["formula"]])) {
+    args[["formula"]] <- y ~ .
+  }
   dat <- data.frame(y = y, x = x) %>%
     set_colnames(c("y", colnames(x)))
   s <- Sys.time()
-  fit <- do.call(stats::glm, c(list(y ~ ., data = dat), args))
+  fit <- do.call(stats::glm, c(list(data = dat), args))
   time <- Sys.time() - s
   p <- ncol(x)
-  pval <- stats::summary.glm(fit)$coef[,4][2:(1+p)] # 1st coef is Intercept.
+  all_pval <- stats::summary.glm(fit)$coef[,4]
+  all_int_pval <- all_pval[grepl("\\:", names(all_pval))]
+  all_main_pval <- all_pval[!grepl("\\:", names(all_pval))]
+  pval <- int_pval <- main_pval <- rep(NA, p)
+  names(pval) <- names(int_pval) <- names(main_pval) <- colnames(x)
+  # Save the smallest p-value of all terms with the variable name
+  for (var in colnames(x)) {
+    int_pval[var] <- min(all_int_pval[grepl(var, names(all_int_pval))])
+    main_pval[var] <- min(all_main_pval[grepl(var, names(all_main_pval))])
+    pval[var] <- min(int_pval[var], main_pval[var])
+  }
   return(list(pval = pval,
+              main_pval = main_pval,
+              int_pval = int_pval,
               time = time))
 }
 
@@ -320,7 +355,3 @@ bws_wrapper <- function(y, x, args = list(iter = 2000)) {
               weights = weights,
               time = bws_time))
 }
-
-
-
-

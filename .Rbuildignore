@@ -1,3 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+README_cache/
+mpower-vignette_cache/
+cran-comments.md
