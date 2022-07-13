@@ -21,28 +21,28 @@ InferenceModel <- function(model, name = NULL, ...) {
     mod[["model_name"]] <- name
   } else if (is.character(model)) {
     if (model == "bma") {
-      if (!require("BMA")) {
+      if (!requireNamespace("BMA")) {
         stop("Package BMA not installed.")
       }
       mod[["model"]] <- bma_wrapper
     } else if (model == "bkmr") {
-      if (!require("bkmr")) {
+      if (!requireNamespace("bkmr")) {
         stop("Package bkmr not installed.")
       }
       mod[["model"]] <- bkmr_wrapper
     } else if (model == "bws") {
-      if (!require("bws")) {
+      if (!requireNamespace("bws")) {
         stop("Package bws not installed. Install at devtools::install_github('phuchonguyen/bws')")
       }
       message("Estimating the power of detecting the overall effect based on posterior credible interval. Running sim_power() with cores > 1 is recommended.")
       mod[["model"]] <- bws_wrapper
     } else if (model == "qgc") {
-      if (!require("qgcomp")) {
+      if (!requireNamespace("qgcomp")) {
         stop("Package qgcomp not installed.")
       }
       mod[["model"]] <- qgcomp_lin_wrapper
     } else if (model == "fin") {
-      if (!require("infinitefactor")) {
+      if (!requireNamespace("infinitefactor")) {
         stop("Package infinitefactor not installed.")
       }
       mod[["model"]] <- fin_wrapper

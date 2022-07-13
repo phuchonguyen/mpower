@@ -258,7 +258,7 @@ mplot.mpower_cvine_MixtureModel <- function(obj, split = TRUE) {
 
 plot_marginals <- function(data) {
   g <- list()
-  nums <- data %>% dplyr::select(where(is.numeric))
+  nums <- data %>% dplyr::select_if(is.numeric)
   if (ncol(nums) > 0) {
     nums <- nums %>%
     tidyr::pivot_longer(tidyr::everything(), values_to="value", names_to="name")
@@ -267,7 +267,7 @@ plot_marginals <- function(data) {
     labs(title = "Univariate distributions"))
     g <- c(g, temp)
   }
-  cat <- data %>% dplyr::select(!where(is.numeric))
+  cat <- data %>% dplyr::select_if(purrr::negate(is.numeric))
   if (ncol(cat) > 0) {
     cat <- cat %>%
     tidyr::pivot_longer(tidyr::everything(), values_to="value", names_to="name")
