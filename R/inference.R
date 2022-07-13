@@ -21,15 +21,30 @@ InferenceModel <- function(model, name = NULL, ...) {
     mod[["model_name"]] <- name
   } else if (is.character(model)) {
     if (model == "bma") {
+      if (!("BMA" %in% installed.packages()[,"Package"])) {
+        stop("Package BMA not installed.")
+      }
       mod[["model"]] <- bma_wrapper
     } else if (model == "bkmr") {
+      if (!("bkmr" %in% installed.packages()[,"Package"])) {
+        stop("Package bkmr not installed.")
+      }
       mod[["model"]] <- bkmr_wrapper
     } else if (model == "bws") {
+      if (!("bws" %in% installed.packages()[,"Package"])) {
+        stop("Package bws not installed. Install at devtools::install_github('phuchonguyen/bws')")
+      }
       message("Estimating the power of detecting the overall effect based on posterior credible interval. Running sim_power() with cores > 1 is recommended.")
       mod[["model"]] <- bws_wrapper
     } else if (model == "qgc") {
+      if (!("qgcomp" %in% installed.packages()[,"Package"])) {
+        stop("Package qgcomp not installed.")
+      }
       mod[["model"]] <- qgcomp_lin_wrapper
     } else if (model == "fin") {
+      if (!("infinitefactor" %in% installed.packages()[,"Package"])) {
+        stop("Package infinitefactor not installed.")
+      }
       mod[["model"]] <- fin_wrapper
     } else if (model == "glm") {
       message("Estimating the power of conditional t-test on each regression coefficient.")
