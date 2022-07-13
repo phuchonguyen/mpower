@@ -13,7 +13,8 @@ sim_curve(
   cores = 1,
   file = NULL,
   errorhandling = "stop",
-  snr_iter = 10000
+  snr_iter = 10000,
+  cluster_export = c()
 )
 }
 \arguments{
@@ -37,14 +38,19 @@ periodically. By default write to an RDS file.}
 in any iteration, remove that iteration (remove), return the error message
 verbatim in the output (pass), or terminate the loop (stop). Default is
 "remove". See R package `foreach` for more details.}
+
+\item{snr_iter}{An integer for number of Monte Carlo samples to estimate SNR}
+
+\item{cluster_export}{A vector of functions to pass to the
+parallel-processing clusters}
 }
 \value{
 A SimCurve object. Attributes: s: a number, snr: a number or list of
   numbers, n: a number or list of numbers, xmod: a MixtureModel, ymod: one or
-  a list of OutcomeModels, imod: an InferenceModel, sims: a list of simulation
-  output matrices.
+  a list of OutcomeModels, imod: an InferenceModel, sims: a list of
+  simulation output matrices.
 }
 \description{
-This function can be used to create power curves by calling
-  sim_power() on combinations of its inputs.
+This function can be used to create power curves by calling sim_power() on
+combinations of its inputs.
 }

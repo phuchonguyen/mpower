@@ -4,7 +4,6 @@
 # mpower
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 This package allows users to conduct power analysis based on Monte Carlo
@@ -47,19 +46,19 @@ library(ggplot2)
 
 To do power analysis using Monte Carlo simulations, we’ll need:
 
-  - A generative model for the predictors. The predictors can be
+-   A generative model for the predictors. The predictors can be
     correlated and mixed-scaled. Use `MixtureModel()`.
 
-  - A generative model for the outcome that describes the “true”
+-   A generative model for the outcome that describes the “true”
     relationships between the predictors and outcome. Use
     `OutcomeModel()`.
 
-  - An inference model. Ideally, this would be the same as the
+-   An inference model. Ideally, this would be the same as the
     generative model for the outcome. However, in practice our model can
     at best approximate the “true” predictor-outcome relationships. Use
     `InferenceModel()`.
 
-  - A “significance” criterion and threshold for the inference model.
+-   A “significance” criterion and threshold for the inference model.
     For instance, the t-test in a linear regression has its p-value as
     the “significance” criterion, and a common threshold for statistical
     significance is 0.05.
@@ -82,10 +81,10 @@ xmod <- mpower::MixtureModel(method = "cvine", G = G, m = 50,
                            ordinal = "qmultinom(probs=c(0.6, 0.2, 0.2))",
                            categorical = "qmultinom(probs=c(0.6, 0.2, 0.2))"),
     cvine_dtypes = list(categorical = "factor"))
-plot(xmod)
+mpower::mplot(xmod)
 ```
 
-<img src="man/figures/README-cvine-xmod-1.png" width="100%" /><img src="man/figures/README-cvine-xmod-2.png" width="100%" />
+<img src="man/figures/README-cvine-xmod-1.png" width="100%" /><img src="man/figures/README-cvine-xmod-2.png" width="100%" /><img src="man/figures/README-cvine-xmod-3.png" width="100%" />
 
 #### Define outcome models
 
@@ -129,8 +128,7 @@ curve <- mpower::sim_curve(xmod, ymod_list, imod, s = 100,
                    n = c(100, 300), cores = 3)
 ```
 
-We can get a table of summaries and a plot of the
-power:
+We can get a table of summaries and a plot of the power:
 
 ``` r
 curve_df <- mpower::summary(curve , crit = "pval", thres = 0.05, how = "lesser")
@@ -142,19 +140,19 @@ curve_df <- mpower::summary(curve , crit = "pval", thres = 0.05, how = "lesser")
     #>  *** POWER CURVE ANALYSIS SUMMARY ***
     #> Number of Monte Carlo simulations: 100
     #> Number of observations in each simulation: 100 300
-    #> Data generating process estimated SNR (for each outcome model): 0.23 0.07 0.01
+    #> Data generating process estimated SNR (for each outcome model): 0.26 0.06 0.01
     #> Inference model: F-test
     #> Significance criterion: pval
     #> Significance threshold: 0.05
     #> 
     #> |       | power|   n|  snr|
     #> |:------|-----:|---:|----:|
-    #> |F-test |  0.98| 100| 0.23|
-    #> |F-test |  0.47| 100| 0.07|
-    #> |F-test |  0.14| 100| 0.01|
-    #> |F-test |  1.00| 300| 0.23|
-    #> |F-test |  0.94| 300| 0.07|
-    #> |F-test |  0.29| 300| 0.01|
+    #> |F-test |  0.96| 100| 0.26|
+    #> |F-test |  0.54| 100| 0.06|
+    #> |F-test |  0.08| 100| 0.01|
+    #> |F-test |  1.00| 300| 0.26|
+    #> |F-test |  0.95| 300| 0.06|
+    #> |F-test |  0.27| 300| 0.01|
 
 ### Example 2: Estimate a data generative model from existing data
 
@@ -181,8 +179,7 @@ nhanes_nona <- nhanes1518 %>%
 #### Estimate the generative model:
 
 We use a Bayesian semi-parametric Gaussian copula for this step. See
-more in the R package
-`sbgcop`.
+more in the R package `sbgcop`.
 
 ``` r
 xmod <- mpower::MixtureModel(method = "estimation" , data = nhanes_nona, 
@@ -190,10 +187,10 @@ xmod <- mpower::MixtureModel(method = "estimation" , data = nhanes_nona,
 ```
 
 ``` r
-plot(xmod, split=F)$corr
+mplot(xmod, split=F)$corr
 ```
 
-<img src="man/figures/README-est-plot-1.png" width="100%" />
+<img src="man/figures/README-est-mplot-1.png" width="100%" />
 
 #### Define an outcome model:
 
@@ -263,8 +260,7 @@ xmod <- mpower::MixtureModel(method = "resampling", data = nhanes_demo %>% selec
 
 #### Define the outcome model with a fitted model
 
-We can generate outcomes from a previously fitted
-model.
+We can generate outcomes from a previously fitted model.
 
 ``` r
 lm_demo <- lm(BMI ~ Poverty*(poly(Age, 2) + HHIncome + HomeOwn + Education), data = nhanes_demo)
@@ -316,30 +312,30 @@ curve_df <- mpower::summary(curve, crit = "pval", thres = 0.05, how = "lesser")
     #> 
     #> |          | power|    n|  snr|
     #> |:---------|-----:|----:|----:|
-    #> |Education | 0.315| 1000| 0.03|
-    #> |HHIncome  | 0.220| 1000| 0.03|
-    #> |HomeOwn   | 0.145| 1000| 0.03|
-    #> |Poverty   | 0.580| 1000| 0.03|
-    #> |Age       | 0.820| 1000| 0.03|
-    #> |Education | 0.575| 2000| 0.03|
-    #> |HHIncome  | 0.360| 2000| 0.03|
-    #> |HomeOwn   | 0.195| 2000| 0.03|
-    #> |Poverty   | 0.815| 2000| 0.03|
+    #> |Education | 0.330| 1000| 0.03|
+    #> |HHIncome  | 0.185| 1000| 0.03|
+    #> |HomeOwn   | 0.155| 1000| 0.03|
+    #> |Poverty   | 0.575| 1000| 0.03|
+    #> |Age       | 0.730| 1000| 0.03|
+    #> |Education | 0.590| 2000| 0.03|
+    #> |HHIncome  | 0.410| 2000| 0.03|
+    #> |HomeOwn   | 0.220| 2000| 0.03|
+    #> |Poverty   | 0.830| 2000| 0.03|
     #> |Age       | 0.955| 2000| 0.03|
-    #> |Education | 0.710| 3000| 0.03|
-    #> |HHIncome  | 0.510| 3000| 0.03|
-    #> |HomeOwn   | 0.270| 3000| 0.03|
-    #> |Poverty   | 0.895| 3000| 0.03|
-    #> |Age       | 1.000| 3000| 0.03|
-    #> |Education | 0.850| 4000| 0.03|
-    #> |HHIncome  | 0.640| 4000| 0.03|
-    #> |HomeOwn   | 0.225| 4000| 0.03|
-    #> |Poverty   | 0.960| 4000| 0.03|
+    #> |Education | 0.700| 3000| 0.03|
+    #> |HHIncome  | 0.470| 3000| 0.03|
+    #> |HomeOwn   | 0.210| 3000| 0.03|
+    #> |Poverty   | 0.880| 3000| 0.03|
+    #> |Age       | 0.990| 3000| 0.03|
+    #> |Education | 0.860| 4000| 0.03|
+    #> |HHIncome  | 0.580| 4000| 0.03|
+    #> |HomeOwn   | 0.205| 4000| 0.03|
+    #> |Poverty   | 0.955| 4000| 0.03|
     #> |Age       | 1.000| 4000| 0.03|
-    #> |Education | 0.925| 5000| 0.03|
-    #> |HHIncome  | 0.650| 5000| 0.03|
+    #> |Education | 0.890| 5000| 0.03|
+    #> |HHIncome  | 0.720| 5000| 0.03|
     #> |HomeOwn   | 0.285| 5000| 0.03|
-    #> |Poverty   | 0.975| 5000| 0.03|
+    #> |Poverty   | 0.970| 5000| 0.03|
     #> |Age       | 1.000| 5000| 0.03|
 
 #### Usage of other built-in inference models
@@ -351,31 +347,13 @@ package.
 
 “Significant” is when the credible intervals don’t include zero. We
 access the 95% credible interval coverage with criterion “beta” and
-threshold
-0.05.
+threshold 0.05.
 
 ``` r
-bws_imod <- mpower::InferenceModel(model = "bws", iter = 2000, family = "gaussian",
-                           refresh = 0)
-bws_power <- mpower::sim_power(xmod, ymod, bws_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "stop")
-```
-
-``` r
-temp_df <- summary(bws_power, crit="beta", thres=0.05, how = "lesser")
-#> 
-#>  *** POWER ANALYSIS SUMMARY ***
-#> Number of Monte Carlo simulations: 2
-#> Number of observations in each simulation: 100
-#> Data generating process estimated SNR: 0.03
-#> Inference model: bws
-#> Significance criterion: beta
-#> 
-#> Significance threshold:  0.05
-#> 
-#> |        | power|
-#> |:-------|-----:|
-#> |overall |     0|
+bws_imod <- mpower::InferenceModel(model = "bws", iter = 2000, family = "gaussian", refresh = 0)
+bws_power <- mpower::sim_power(xmod, ymod, bws_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo"))
 ```
 
 ###### Quantile G-computation
@@ -385,117 +363,32 @@ is the p-value.
 
 ``` r
 qgcomp_imod <- mpower::InferenceModel(model="qgc")
-qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
-```
-
-``` r
-temp_df <- summary(qg_power, "pval", 0.05, how = "lesser")
-#> 
-#>  *** POWER ANALYSIS SUMMARY ***
-#> Number of Monte Carlo simulations: 50
-#> Number of observations in each simulation: 100
-#> Data generating process estimated SNR: 0.04
-#> Inference model: qgc
-#> Significance criterion: pval
-#> 
-#> Significance threshold:  0.05
-#> 
-#> |        | power|
-#> |:-------|-----:|
-#> |overall | 0.022|
+qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
 ###### Bayesian factor analysis with interactions
 
 ``` r
 fin_imod <- InferenceModel(model="fin", nrun = 2000, verbose=F)
-fin_power <- sim_power(xmod, ymod, fin_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
-```
-
-``` r
-temp_df <- summary(fin_power, "beta", 0.05, how = "lesser")
-#> 
-#>  *** POWER ANALYSIS SUMMARY ***
-#> Number of Monte Carlo simulations: 200
-#> Number of observations in each simulation: 100
-#> Data generating process estimated SNR: 0.03
-#> Inference model: fin
-#> Significance criterion: beta
-#> 
-#> Significance threshold:  0.05
-#> 
-#> |             | power|
-#> |:------------|-----:|
-#> |Education    |     0|
-#> |HHIncome     |     0|
-#> |HomeOwnOwn   |     0|
-#> |HomeOwnRent  |     0|
-#> |HomeOwnOther |     0|
-#> |Poverty      |     0|
-#> |Age          |     0|
+fin_power <- sim_power(xmod, ymod, fin_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
 ###### Bayesian model averaging
 
 ``` r
 bma_imod <- InferenceModel(model="bma", glm.family = "gaussian")
-bma_power <- sim_power(xmod, ymod, bma_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
-```
-
-``` r
-temp_df <- summary(bma_power, "pip", 0.5, how = "greater")
-#> 
-#>  *** POWER ANALYSIS SUMMARY ***
-#> Number of Monte Carlo simulations: 200
-#> Number of observations in each simulation: 100
-#> Data generating process estimated SNR: 0.03
-#> Inference model: bma
-#> Significance criterion: pip
-#> 
-#> Significance threshold:  0.5
-#> 
-#> |             | power|
-#> |:------------|-----:|
-#> |Education    |     1|
-#> |HHIncome     |     1|
-#> |HomeOwnRent  |     1|
-#> |HomeOwnOther |     1|
-#> |Poverty      |     1|
-#> |Age          |     1|
+bma_power <- sim_power(xmod, ymod, bma_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
 ###### Bayesian kernel machine regression
 
 ``` r
-bkmr_imod <- InferenceModel(model = "bkmr", iter = 500, verbose = F)
-bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 20, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
-```
-
-``` r
-temp_df <- summary(bkmr_power, "pip", 0.5, how = "greater")
-#> 
-#>  *** POWER ANALYSIS SUMMARY ***
-#> Number of Monte Carlo simulations: 20
-#> Number of observations in each simulation: 100
-#> Data generating process estimated SNR: 0.03
-#> Inference model: bkmr
-#> Significance criterion: pip
-#> 
-#> Significance threshold:  0.5
-#> 
-#> |             | power|
-#> |:------------|-----:|
-#> |Education    |  0.05|
-#> |HHIncome     |  0.00|
-#> |HomeOwnOwn   |  0.05|
-#> |HomeOwnRent  |  0.10|
-#> |HomeOwnOther |  0.00|
-#> |Poverty      |  0.10|
-#> |Age          |  0.00|
+bkmr_imod <- InferenceModel(model = "bkmr", iter = 5000, verbose = F)
+bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
 ### Example 4: Logistic regression example
@@ -527,13 +420,13 @@ logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #> 
 #> |                     | power|
 #> |:--------------------|-----:|
-#> |UrinaryBisphenolA    |  0.04|
-#> |UrinaryBenzophenone3 |  0.04|
-#> |Methylparaben        |  0.12|
-#> |Propylparaben        |  0.08|
-#> |dichlorophenol25     |  0.30|
-#> |dichlorophenol24     |  0.08|
-#> |MBzP                 |  0.02|
-#> |MEP                  |  0.66|
-#> |MiBP                 |  0.10|
+#> |UrinaryBisphenolA    |  0.08|
+#> |UrinaryBenzophenone3 |  0.06|
+#> |Methylparaben        |  0.20|
+#> |Propylparaben        |  0.06|
+#> |dichlorophenol25     |  0.32|
+#> |dichlorophenol24     |  0.02|
+#> |MBzP                 |  0.06|
+#> |MEP                  |  0.70|
+#> |MiBP                 |  0.16|
 ```

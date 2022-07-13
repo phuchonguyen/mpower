@@ -1,15 +1,26 @@
 Package: mpower
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Power Analysis Using Monte Carlo Simulation
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Authors@R:
+    person(given = "Phuc H.",
+           family = "Nguyen",
+           role = c("aut", "cre"),
+           email = "phuc.nguyen.rcran@gmail.com",
+           comment = c(ORCID = "0000-0002-6206-0194"))
+Description: Power analysis using Monte Carlo simulation is flexible and
+    compatible with a large class of statistical models, especially when
+    closed-formed power equations aren't available. This package allows users
+    to conduct power analysis using simulation in settings in which consideration
+    of the correlations between predictors is important. Users can set up
+    a data generative model that preserves dependence structures among
+    variables given existing data (continuous, binary, or ordinal). Users can
+    also generate power curves to assess the trade-offs between sample size,
+    effect size, and power of a design.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-Imports: 
+Imports:
     abind,
     boot,
     dplyr,
@@ -29,9 +40,9 @@ Imports:
     tidyselect
 Remotes: phuchonguyen/bws
 RoxygenNote: 7.1.1
-Depends: 
+Depends:
     R (>= 2.10)
-Suggests: 
+Suggests:
     BMA,
     bkmr,
     bws,
@@ -40,5 +51,6 @@ Suggests:
     NHANES,
     qgcomp,
     rmarkdown,
-    rstan
+    rstan,
+    testthat
 VignetteBuilder: knitr

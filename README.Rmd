@@ -78,7 +78,7 @@ xmod <- mpower::MixtureModel(method = "cvine", G = G, m = 50,
                            ordinal = "qmultinom(probs=c(0.6, 0.2, 0.2))",
                            categorical = "qmultinom(probs=c(0.6, 0.2, 0.2))"),
     cvine_dtypes = list(categorical = "factor"))
-plot(xmod)
+mpower::mplot(xmod)
 ```
 
 #### Define outcome models
@@ -154,8 +154,8 @@ xmod <- mpower::MixtureModel(method = "estimation" , data = nhanes_nona,
     sbg_args = list(nsamp = 1000))
 ```
 
-```{r est-plot}
-plot(xmod, split=F)$corr
+```{r est-mplot}
+mplot(xmod, split=F)$corr
 ```
 
 
@@ -257,71 +257,71 @@ Here are examples of how to use other inference models included in the package.
 
 "Significant" is when the credible intervals don't include zero. We access the 95\% credible interval coverage with criterion "beta" and threshold 0.05.
 
-```{r bws-test, results='hide', fig.keep='all'}
-bws_imod <- mpower::InferenceModel(model = "bws", iter = 2000, family = "gaussian",
-                           refresh = 0)
-bws_power <- mpower::sim_power(xmod, ymod, bws_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "stop")
+```{r bws-test, results='hide', fig.keep='all', eval=F}
+bws_imod <- mpower::InferenceModel(model = "bws", iter = 2000, family = "gaussian", refresh = 0)
+bws_power <- mpower::sim_power(xmod, ymod, bws_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo"))
 ```
 
-```{r}
+```{r, include=F, eval=F}
 temp_df <- summary(bws_power, crit="beta", thres=0.05, how = "lesser")
 ```
 
 ###### Quantile G-computation
 
 Similar to BWS but is a frequentist method. The significance criterion is the p-value.
-
-```{r qg-test, results='hide', fig.keep='all'}
+ 
+```{r qg-test, results='hide', fig.keep='all', eval=F}
 qgcomp_imod <- mpower::InferenceModel(model="qgc")
-qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
+qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
-```{r}
+```{r, include=F, eval=F}
 temp_df <- summary(qg_power, "pval", 0.05, how = "lesser")
 ```
 
 ###### Bayesian factor analysis with interactions
 
-```{r fin-test, results='hide', fig.keep='all'}
+```{r fin-test, results='hide', fig.keep='all', eval=F}
 fin_imod <- InferenceModel(model="fin", nrun = 2000, verbose=F)
-fin_power <- sim_power(xmod, ymod, fin_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
+fin_power <- sim_power(xmod, ymod, fin_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
-```{r}
+```{r, include=F, eval=F}
 temp_df <- summary(fin_power, "beta", 0.05, how = "lesser")
 ```
 
 ###### Bayesian model averaging
 
-```{r bma-test, results='hide', fig.keep='all'}
+```{r bma-test, results='hide', fig.keep='all', eval=F}
 bma_imod <- InferenceModel(model="bma", glm.family = "gaussian")
-bma_power <- sim_power(xmod, ymod, bma_imod, s = 50, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
+bma_power <- sim_power(xmod, ymod, bma_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
-```{r}
+```{r, include=F, eval=F}
 temp_df <- summary(bma_power, "pip", 0.5, how = "greater")
 ```
 
 ###### Bayesian kernel machine regression
 
-```{r bkmr-test, results='hide', fig.keep='all'}
-bkmr_imod <- InferenceModel(model = "bkmr", iter = 500, verbose = F)
-bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 20, n = 1000, 
-                       cores=3, snr_iter=100, errorhandling = "remove")
+```{r bkmr-test, results='hide', fig.keep='all', eval=F}
+bkmr_imod <- InferenceModel(model = "bkmr", iter = 5000, verbose = F)
+bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000, 
+                       cores=3, snr_iter=1000, errorhandling = "remove")
 ```
 
-```{r}
+```{r, include=F, eval=F}
 temp_df <- summary(bkmr_power, "pip", 0.5, how = "greater")
 ```
 
 ```{r, include=F, eval=F}
-ms_imod <- InferenceModel(model = "ms", nrun = 100, verbose=F)
-ms_power <- sim_power(xmod, ymod, ms_imod, s = 2, n = 100, 
-                       cores=3, snr_iter=100, errorhandling = "stop")
+ms_imod <- InferenceModel(model = "ms", nrun = 5000, verbose=F)
+ms_power <- sim_power(xmod, ymod, ms_imod, s = 100, n = 100, 
+                       cores=3, snr_iter=1000, errorhandling = "stop")
 temp_df <- summary(ms_power, "pip", 0.5, how = "greater")
 ```
 

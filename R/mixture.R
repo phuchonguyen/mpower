@@ -108,8 +108,8 @@ new_estimation_MixtureModel <- function(data = numeric(), nudge = numeric(),
                                         var_dtypes = character(),
                                         args = list()) {
   if(!is.numeric(as.matrix(data))) {
-    stop("Data must be numeric only. Convert categories to integer but
-         do not use One-hot-encoding.")
+    stop("Data must be numeric only. Convert ordinal factors to integer or
+    use One-hot-encoding.")
   }
   cat("\nEstimating the joint distribution using sbgcop\n")
   sbgcop_fit <- do.call(sbgcop::sbgcop.mcmc, c(list(Y = data), args))
@@ -211,7 +211,8 @@ genx.mpower_cvine_MixtureModel <- function(obj, n) {
 }
 
 #' Quantile function for the multinomial distribution, size = 1
-#' @param probs a vector of probabilities for each level
+#' @param p A quantile
+#' @param probs A vector of probabilities for each level
 #' @export
 qmultinom <- function(p, probs) {
   stopifnot(all(probs<1) & all(probs>0))
@@ -222,17 +223,15 @@ qmultinom <- function(p, probs) {
 
 #' Visualize marginals and Gaussian copula correlations of simulated data
 #' @param obj A MixtureModel object
+#' @param split A logical, whether to display numbers on half of the covariance matrix
 #' @return ggplot2 graphics
 #' @export
-plot <- function(obj, split=TRUE) {
-  UseMethod("plot")
+mplot <- function(obj, split=TRUE) {
+  UseMethod("mplot")
 }
 
-#' Plot the correlations and univariate marginals of the generative model
-#' @param obj A MixtureModel object
-#' @param split A boolean for whether to display numeric values of correlations
 #' @export
-plot.mpower_resampling_MixtureModel <- function(obj, split=TRUE) {
+mplot.mpower_resampling_MixtureModel <- function(obj, split=TRUE) {
   g1 <- plot_marginals(obj$data)
   # C <- cor(genx(obj, 200), method = "spearman")
   # g2 <- plot_corr(C, split=FALSE, title = "Spearman correlations of 200 resampled observations")
@@ -240,7 +239,7 @@ plot.mpower_resampling_MixtureModel <- function(obj, split=TRUE) {
 }
 
 #' @export
-plot.mpower_estimation_MixtureModel <- function(obj, split = TRUE) {
+mplot.mpower_estimation_MixtureModel <- function(obj, split = TRUE) {
   g1 <- plot_marginals(obj$data)
   R_mean <- apply(obj$R, c(1,2), mean)
   g2 <- plot_corr(R_mean, title = "Gaussian copula correlation matrix", split = split)
@@ -248,29 +247,36 @@ plot.mpower_estimation_MixtureModel <- function(obj, split = TRUE) {
 }
 
 #' @export
-plot.mpower_cvine_MixtureModel <- function(obj, split = TRUE) {
-  n <- 5000
-  R <- cvine(d = obj$p, S = obj$G, m = obj$m)
-  Z <- MASS::mvrnorm(n, mu = rep(0, obj$p), Sigma = R)
-  data <- vapply(1:obj$p, function(j) {
-    namej <- obj$var_name[j]
-    p <- stats::pnorm(Z[,j], 0, sqrt(R[j,j]))
-    text <- gsub(")$", ", p=p)", obj$marginals[[namej]])
-    eval(parse(text = text))
-  }, numeric(n)) %>%
-    as.data.frame() %>%
-    magrittr::set_colnames(obj$var_name)
+mplot.mpower_cvine_MixtureModel <- function(obj, split = TRUE) {
+  n <- 100
+  data <- genx(obj, n)
   g1 <- plot_marginals(data)
+  R <- cvine(d = obj$p, S = obj$G, m = obj$m)
   g2 <- plot_corr(R, title = "An example correlation matrix by C-vine", split = split)
   return(list(hist=g1, corr=g2))
 }
 
 plot_marginals <- function(data) {
-  data <- data %>% tidyr::pivot_longer(tidyr::everything(),
-                               values_to="value", names_to="name")
-  g <- ggplot(data, aes(x=!! sym("value"))) +
+  g <- list()
+  nums <- data %>% dplyr::select(where(is.numeric))
+  if (ncol(nums) > 0) {
+    nums <- nums %>%
+    tidyr::pivot_longer(tidyr::everything(), values_to="value", names_to="name")
+    temp <- list(ggplot(nums, aes(x=!! sym("value"))) +
     geom_histogram() + facet_wrap(stats::as.formula("~name")) +
-    labs(title = "Univariate distributions")
+    labs(title = "Univariate distributions"))
+    g <- c(g, temp)
+  }
+  cat <- data %>% dplyr::select(!where(is.numeric))
+  if (ncol(cat) > 0) {
+    cat <- cat %>%
+    tidyr::pivot_longer(tidyr::everything(), values_to="value", names_to="name")
+    temp <- list(ggplot(cat, aes(x=!! sym("value"))) +
+        geom_bar() + facet_wrap(stats::as.formula("~name")) +
+        labs(title = "Univariate distributions") +
+        theme(axis.text.x = element_text(angle = 90)))
+    g <- c(g, temp)
+  }
   return(g)
 }
 
@@ -314,5 +320,3 @@ plot_corr <- function(C, title = "", split = TRUE) {
     coord_fixed()
   return(g)
 }
-
-

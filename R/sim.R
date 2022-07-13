@@ -1,7 +1,7 @@
 #' Power analysis for multiple settings using Monte Carlo simulation
 #'
-#' This function can be used to create power curves by calling
-#'   sim_power() on combinations of its inputs.
+#' This function can be used to create power curves by calling sim_power() on
+#' combinations of its inputs.
 #'
 #' @param xmod A MixtureModel object.
 #' @param ymod One or a list of OutcomeModel object(s).
@@ -16,10 +16,13 @@
 #'   in any iteration, remove that iteration (remove), return the error message
 #'   verbatim in the output (pass), or terminate the loop (stop). Default is
 #'   "remove". See R package `foreach` for more details.
+#' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
+#' @param cluster_export A vector of functions to pass to the
+#'   parallel-processing clusters
 #' @return A SimCurve object. Attributes: s: a number, snr: a number or list of
 #'   numbers, n: a number or list of numbers, xmod: a MixtureModel, ymod: one or
-#'   a list of OutcomeModels, imod: an InferenceModel, sims: a list of simulation
-#'   output matrices.
+#'   a list of OutcomeModels, imod: an InferenceModel, sims: a list of
+#'   simulation output matrices.
 #' @export
 sim_curve <- function(xmod, ymod, imod, s=100, n=100,
                       cores = 1, file = NULL, errorhandling = "stop",
@@ -82,6 +85,7 @@ new_SimCurve <- function(x = list()) {
 #'   verbatim in the output (pass), or terminate the loop (stop). Default is
 #'   "remove". See R package `foreach` for more details.
 #' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
+#' @param cluster_export A vector of functions to pass to the parallel-processing clusters
 #' @return A PowerSim object. Attributes: xmod, ymod, imod, s, n, simulation
 #'   samples.
 #' @export
@@ -149,8 +153,10 @@ new_Sim <- function(x = list()) {
 #' @param thres A number or vector of numbers spefifying the thresholds of
 #'   "significance".
 #' @param digits An integer for the number of decimal points to display.
-#' @return A data.frame summary of power for each predictor for each
-#'   combination of thresholds, sample size, signal-to-noise ratios.
+#' @param how A string, whether to compare crit 'greater' or 'lesser' than the
+#'   threshold
+#' @return A data.frame summary of power for each predictor for each combination
+#'   of thresholds, sample size, signal-to-noise ratios.
 #' @export
 summary <- function(sim, crit, thres, digits = 3, how = "greater") {
   UseMethod("summary", sim)
@@ -255,9 +261,7 @@ summary_one_sim_many_thres <- function(sim, crit, thres, digits, how) {
   return(res)
 }
 
-
-#' See summary()
-#' Returns a data.frame. Each column is power of a predictor. A column for threshold.
+# Returns a data.frame. Each column is power of a predictor. A column for threshold.
 summary_one_sim_one_thres <- function(sim, crit, thres, digits, how, pivot=FALSE) {
   res <- sim %>%
     purrr::map(crit) %>%
@@ -266,7 +270,8 @@ summary_one_sim_one_thres <- function(sim, crit, thres, digits, how, pivot=FALSE
       else {e <= thres}}) %>%
     abind::abind(along = -1) %>%
     tibble::as_tibble() %>%
-    dplyr::summarise(dplyr::across(tidyselect::everything(), mean)) %>% round(digits) %>%  #TODO: correct colnames???
+    dplyr::summarise(dplyr::across(tidyselect::everything(), mean)) %>%
+    round(digits) %>%  #TODO: correct colnames???
     dplyr::mutate(thres = thres)
   if (pivot) {
     res <- res %>%

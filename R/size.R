@@ -1,3 +1,8 @@
+#' Monte Carlo approximation of the SNR
+#' @param ymod A OutcomeModel object
+#' @param xmod A MixtureModel object
+#' @param m Number of MC samples
+#' @return An estimate SNR
 #' @export
 estimate_snr <- function(ymod, xmod, m=5000) {
   X <- genx(xmod, n = m)
@@ -16,11 +21,19 @@ estimate_snr <- function(ymod, xmod, m=5000) {
   }
 }
 
+#' Convert R-squared value to the SNR
+#' @param r R-squared value
 #' @export
 rsq2snr <- function(r) {
   (1/r - 1)^(-1)
 }
 
+#' Rescale the mean function of an OutcomeModel to meet a given SNR
+#' @param snr A SNR
+#' @param ymod A OutcomeModel object to modify
+#' @param xmod A MixtureModel object
+#' @param m Number of MC samples to estimate the SNR of a proposed noise variance
+#' @return A new OutcomeModel object
 #' @export
 scale_f <- function(snr, ymod, xmod, m=5000) {
   if (ymod$family != "gaussian") stop("Family not implemented")
@@ -32,6 +45,12 @@ scale_f <- function(snr, ymod, xmod, m=5000) {
   return(OutcomeModel(f = f_new, family = ymod$family, sigma = ymod$sigma))
 }
 
+#' Rescale the noise variance of a Gaussian OutcomeModel to meet a given SNR
+#' @param snr A SNR
+#' @param ymod A OutcomeModel object to modify
+#' @param xmod A MixtureModel object
+#' @param m Number of MC samples to estimate the SNR of a proposed noise variance
+#' @return A new OutcomeModel object
 #' @export
 scale_sigma <- function(snr, ymod, xmod, m=5000) {
   if (ymod$family != "gaussian") stop("Family not implemented")

@@ -7,7 +7,9 @@
 qmultinom(p, probs)
 }
 \arguments{
-\item{probs}{a vector of probabilities for each level}
+\item{p}{A quantile}
+
+\item{probs}{A vector of probabilities for each level}
 }
 \description{
 Quantile function for the multinomial distribution, size = 1

@@ -5,29 +5,37 @@
 \title{Citation:
 Daniel Lewandowski, Dorota Kurowicka, Harry Joe,
 Generating random correlation matrices based on vines and extended onion method,
-Journal of Multivariate Analysis,
-Volume 100, Issue 9,
-2009,
-Pages 1989-2001,
-ISSN 0047-259X,
-https://doi.org/10.1016/j.jmva.2009.04.008.
-Reference code: https://stats.stackexchange.com/questions/124538/how-to-generate-a-large-full-rank-random-correlation-matrix-with-some-strong-cor
-Nother useful reference: https://www.sciencedirect.com/science/article/pii/S0047259X05000886:
-        generates a positive definite correlation matrix}
+Journal of Multivariate Analysis, Volume 100, Issue 9, 2009, Pagess 1989-2001,
+ISSN 0047-259X, https://doi.org/10.1016/j.jmva.2009.04.008.
+Reference code: https://stats.stackexchange.com/questions/124538/how-to-
+generate-a-large-full-rank-random-correlation-matrix-with-some-strong-cor
+Nother useful reference: https://www.sciencedirect.com/science/article/pii/
+S0047259X05000886: generates a positive definite correlation matrix}
 \usage{
 cvine(d, alpha = 10, beta = 10, S = NULL, m = 100)
+}
+\arguments{
+\item{d}{Number of dimension}
+
+\item{alpha}{Param for Beta distribution}
+
+\item{beta}{Param for Beta distribution}
+
+\item{S}{A "guess" of the correlation matrix}
+
+\item{m}{A number that indicates how much the random matrices vary from S}
+}
+\value{
+A random positive-definite correlation matrix
 }
 \description{
 Citation:
 Daniel Lewandowski, Dorota Kurowicka, Harry Joe,
 Generating random correlation matrices based on vines and extended onion method,
-Journal of Multivariate Analysis,
-Volume 100, Issue 9,
-2009,
-Pages 1989-2001,
-ISSN 0047-259X,
-https://doi.org/10.1016/j.jmva.2009.04.008.
-Reference code: https://stats.stackexchange.com/questions/124538/how-to-generate-a-large-full-rank-random-correlation-matrix-with-some-strong-cor
-Nother useful reference: https://www.sciencedirect.com/science/article/pii/S0047259X05000886:
-        generates a positive definite correlation matrix
+Journal of Multivariate Analysis, Volume 100, Issue 9, 2009, Pagess 1989-2001,
+ISSN 0047-259X, https://doi.org/10.1016/j.jmva.2009.04.008.
+Reference code: https://stats.stackexchange.com/questions/124538/how-to-
+generate-a-large-full-rank-random-correlation-matrix-with-some-strong-cor
+Nother useful reference: https://www.sciencedirect.com/science/article/pii/
+S0047259X05000886: generates a positive definite correlation matrix
 }

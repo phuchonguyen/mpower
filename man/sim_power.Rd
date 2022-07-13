@@ -13,7 +13,8 @@ sim_power(
   cores = 1,
   file = NULL,
   errorhandling = "stop",
-  snr_iter = 10000
+  snr_iter = 10000,
+  cluster_export = c()
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ verbatim in the output (pass), or terminate the loop (stop). Default is
 "remove". See R package `foreach` for more details.}
 
 \item{snr_iter}{An integer for number of Monte Carlo samples to estimate SNR}
+
+\item{cluster_export}{A vector of functions to pass to the parallel-processing clusters}
 }
 \value{
 A PowerSim object. Attributes: xmod, ymod, imod, s, n, simulation

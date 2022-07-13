@@ -16,10 +16,13 @@ sim_curve().}
 "significance".}
 
 \item{digits}{An integer for the number of decimal points to display.}
+
+\item{how}{A string, whether to compare crit 'greater' or 'lesser' than the
+threshold}
 }
 \value{
-A data.frame summary of power for each predictor for each
-  combination of thresholds, sample size, signal-to-noise ratios.
+A data.frame summary of power for each predictor for each combination
+  of thresholds, sample size, signal-to-noise ratios.
 }
 \description{
 Tabular and graphical summaries of power simulation

@@ -333,7 +333,3 @@ bws_wrapper <- function(y, x, args = list(iter = 2000)) {
               weights = weights,
               time = bws_time))
 }
-
-
-
-
