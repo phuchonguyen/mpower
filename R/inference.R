@@ -106,7 +106,7 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
 #'   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
 mixselect_wrapper <- function(y, x, args=list()) {
   y <- matrix(y, length(y), 1)
-  x <- as.matrix(x)
+  x <- stats::model.matrix(~. -1, x)
   s <- Sys.time()
   ms_out <- do.call(MixSelect, c(list(y = y, X = x), args))
   ms_time <- Sys.time() - s

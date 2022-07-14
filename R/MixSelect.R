@@ -1,32 +1,35 @@
-# Gibbs sampler for MixSelect regression, based on a decomposition of the regression
-#           surface in:
-#           - main effects
-#           - interactions with heredity constraint
-#           - nonlinear deviation distributed as projected GP
-# ArXiv: https://arxiv.org/abs/1911.01910
-# Email: ff31@duke.edu for questions
-
-# ARGUMENTS: y: response vector;
-#            X: predictor matrix (n x p) to be included in projected GP;
-#            Z: covariate adjustments matrix (n x q);
-#            nrun: number of iterations;
-#            burn: burn-in period;
-#            thin: thinning interval; lambda_prior = "cont_spike",
-#            tau: variance hyperparameter for continuous spike and slab on main effects and interactions
-#            c: shrinkage parameter for continuous spike and slab on main effects and interactions
-#            exp_C: exponent of exponential covariance, default is  (2.2) in paper
-#            lambda_prior: "cont_spike" or "discrete_spike", the  latter is extremely slow and  not  suggested
-#            na: T if analysis with missing data
-#            list_na: vector of dimension p+q indicating which variables in X and Z need to be included in  Factor Model,
-#                   this is because maybe we don't want to use a factor model for all the covariates, or maybe there are some variables
-#                   that are not missing
-#                   If null, use all columns in X and Z
-#            k_na: number of latent factors for analysis with NAs, refer to Section 5.3 in paper
-#                  Defaule is 2*log(p) where p is number of variables included in the Factor Model
-#            sd_lambda: hyperparamenter for element of \Lambda matrix
-#            lod: T if analysis with data below the Limit of Detection (LOD)
-#            X_lod: Matrix of dimension nxp, 1 if observation i,j has been observed  below LOD and 1  otherwise
-#            lod_vec: vector or dimension  px1 containing  the LOD for each  variable  in  X
+#' Gibbs sampler for MixSelect regression, based on a decomposition of the regression
+#'           surface in:
+#'           - main effects
+#'           - interactions with heredity constraint
+#'           - nonlinear deviation distributed as projected GP
+#' ArXiv: https://arxiv.org/abs/1911.01910
+#' Email: ff31@duke.edu for questions
+#' @param y response vector;
+#' @param X predictor matrix (n x p) to be included in projected GP;
+#' @param Z covariate adjustments matrix (n x q);
+#' @param nrun number of iterations;
+#' @param burn burn-in period;
+#' @param thin thinning interval; lambda_prior = "cont_spike",
+#' @param tau variance hyperparameter for continuous spike and slab on main effects and interactions
+#' @param c shrinkage parameter for continuous spike and slab on main effects and interactions
+#' @param exp_C exponent of exponential covariance, default is  (2.2) in paper
+#' @param heredity "strong" or "weak"
+#' @param lambda_prior "cont_spike" or "discrete_spike", the  latter is extremely slow and  not  suggested
+#' @param na T if analysis with missing data
+#' @param list_na vector of dimension p+q indicating which variables in X and Z need to be included in  Factor Model,
+#'                   this is because maybe we don't want to use a factor model for all the covariates, or maybe there are some variables
+#'                   that are not missing
+#'                   If null, use all columns in X and Z
+#' @param k_na number of latent factors for analysis with NAs, refer to Section 5.3 in paper
+#'                  Defaule is 2*log(p) where p is number of variables included in the Factor Model
+#' @param sd_lambda hyperparamenter for element of Lambda matrix
+#' @param lod T if analysis with data below the Limit of Detection (LOD)
+#' @param X_lod Matrix of dimension nxp, 1 if observation i,j has been observed  below LOD and 1  otherwise
+#' @param lod_vec vector or dimension  px1 containing  the LOD for each  variable  in  X
+#' @param verbose logical
+#' @importFrom stats dgamma dnorm model.matrix rbeta rbinom rgamma rnorm runif
+#' @importFrom utils setTxtProgressBar txtProgressBar
 
 MixSelect = function(y, X , Z = NULL,
                      nrun = 2000, burn = nrun/2, thin = 1,

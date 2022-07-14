@@ -29,7 +29,7 @@ And the development version from [GitHub](https://github.com/phuchonguyen/mpower
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("phuchonguyen/mpower")
+devtools::install_github("phuchonguyen/mpower", ref="mixselect")
 ```
 
 ## Tutorial
@@ -318,12 +318,17 @@ bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000,
 temp_df <- summary(bkmr_power, "pip", 0.5, how = "greater")
 ```
 
-```{r, include=F, eval=F}
+###### MixSelect
+
+```{r, eval=F}
 ms_imod <- InferenceModel(model = "ms", nrun = 5000, verbose=F)
-ms_power <- sim_power(xmod, ymod, ms_imod, s = 100, n = 100, 
-                       cores=3, snr_iter=1000, errorhandling = "stop")
+ms_power <- sim_power(xmod, ymod, ms_imod, s = 50, n = 100, 
+                       cores=1, snr_iter=1000, errorhandling = "stop")
+```
+```{r, include=F, eval=F}
 temp_df <- summary(ms_power, "pip", 0.5, how = "greater")
 ```
+
 
 ### Example 4: Logistic regression example
 

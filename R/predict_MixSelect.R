@@ -56,7 +56,7 @@ predict_MixSelect = function(gibbs, X_test = NULL, Z_test = NULL,
       Lambda_na = gibbs$Lambda[s,,]
       eta_na = gibbs$eta[s,,]
       ps_na = gibbs$ps[s,]
-      W_pred = eta_na %*% t(Lambda_na) + mvtnorm::rmvnorm(n, sigma = diag(1/ps_na))
+      W_pred = eta_na %*% t(Lambda_na) + mvtnorm::rmvnorm(nrow(X), sigma = diag(1/ps_na))
       W[W_na] = W_pred[W_na]
       XZ[,list_na] = W
       X = XZ[,1:p]
@@ -92,8 +92,8 @@ predict_MixSelect = function(gibbs, X_test = NULL, Z_test = NULL,
     PKPt_12 = PKPt_big[1:n_test,(n_test+1):N]
     Sig_22_inv = solve(PKPt_big[(n_test+1):N,(n_test+1):N])
 
-    mu_pred = Z_test%*%beta_z + X_test%*%gibbs$beta[s,] + X_int_test%*%gibbs$lambda[s,]
-    mu = Z%*%beta_z + X%*%beta + X_int%*%lambda
+    mu_pred = Z_test%*%gibbs$beta_z + X_test%*%gibbs$beta[s,] + X_int_test%*%gibbs$lambda[s,]
+    mu = Z%*%gibbs$beta_z + X%*%beta + X_int%*%gibbs$lambda
 
     y_pred[s,] = mu_pred + PKPt_12%*%Sig_22_inv%*%(y-mu)
   }
