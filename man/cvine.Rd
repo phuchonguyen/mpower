@@ -21,7 +21,7 @@ cvine(d, alpha = 10, beta = 10, S = NULL, m = 100)
 
 \item{beta}{Param for Beta distribution}
 
-\item{S}{A "guess" of the correlation matrix}
+\item{S}{A 'guess' of the correlation matrix}
 
 \item{m}{A number that indicates how much the random matrices vary from S}
 }

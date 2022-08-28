@@ -33,8 +33,8 @@
 "nhanes1518"
 
 
-
-#' Data from a study TODO CITE
-#' @format TODO
-#' @source TODO
+#' Data from Wu B, Jiang Y, Jin X, He L (2020). “Using three statistical methods to analyze the association
+#' between exposure to 9 compounds and obesity in children and adolescents: NHANES 2005-
+#' 2010.” Environmental Health, 19(94)
+#' @source \url{https://ehjournal.biomedcentral.com/articles/10.1186/s12940-020-00642-6}
 "nhanes"

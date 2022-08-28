@@ -7,12 +7,12 @@
 genx(obj, n)
 }
 \arguments{
-\item{obj}{A MixtureModel object}
+\item{obj}{A MixtureModel object.}
 
-\item{n}{An integer, number of observations to generate}
+\item{n}{An integer, number of observations to generate.}
 }
 \value{
-A (n x p) dataframe
+A (n x p) dataframe.
 }
 \description{
 Generates a matrix of n observations of p predictors

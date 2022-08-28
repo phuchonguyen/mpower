@@ -24,9 +24,9 @@ sim_power(
 
 \item{imod}{An InferenceModel object.}
 
-\item{s}{An integer for number of Monte Carlo simulation.}
+\item{s}{An integer for number of Monte Carlo simulations.}
 
-\item{n}{An interger for sample size in each simulation.}
+\item{n}{An integer for sample size in each simulation.}
 
 \item{cores}{An integer for number of processing cores. When cores > 1,
 parallelism is automatically applied.}
@@ -44,9 +44,30 @@ verbatim in the output (pass), or terminate the loop (stop). Default is
 \item{cluster_export}{A vector of functions to pass to the parallel-processing clusters}
 }
 \value{
-A PowerSim object. Attributes: xmod, ymod, imod, s, n, simulation
-  samples.
+A PowerSim object. Attributes:
+\describe{
+  \item{s}{a number of simulations.}
+  \item{snr}{a real number for SNR of the OutcomeModel.}
+  \item{n}{a number of sample sizes.}
+  \item{xmod}{the MixtureModel used.}
+  \item{ymod}{the OutcomeModel used.}
+  \item{imod}{the InferenceModel used.}
+  \item{sims}{an output matrices.}
+}
 }
 \description{
 Power analysis using Monte Carlo simulation
+}
+\examples{
+data("nhanes1518")
+chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
+"URXMCOH", "URXMEP","URXMHBP", "URXMHH", "URXMHNC", "URXMHP", "URXMIB",
+"URXMNP", "URXMOH", "URXMZP")
+chems_mod <- mpower::MixtureModel(nhanes1518[, chems], method = "resampling")
+bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP +
+0.1*URXCOP*URXECP", family = "binomial")
+logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
+logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
+s=100, n=2000, cores=2, snr_iter=2000)
+logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 }

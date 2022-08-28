@@ -1,28 +1,46 @@
-#' Power analysis for multiple settings using Monte Carlo simulation
+#' Power curve using Monte Carlo simulation
 #'
 #' This function can be used to create power curves by calling sim_power() on
-#' combinations of its inputs.
+#' combinations of many sample sizes and signal-to-noise ratio (SNR).
 #'
 #' @param xmod A MixtureModel object.
 #' @param ymod One or a list of OutcomeModel object(s).
 #' @param imod An InferenceModel object.
-#' @param s An integer for number of Monte Carlo simulation.
-#' @param n An interger or a vector of sample sizes.
-#' @param cores An integer for number of processing cores. When cores > 1,
+#' @param s An integer for the number of Monte Carlo simulations.
+#' @param n An integer or a vector of sample sizes.
+#' @param cores An integer for the number of processing cores. When cores > 1,
 #'   parallelism is automatically applied.
 #' @param file A string, a file name with no extension to write samples to
 #'   periodically. By default write to an RDS file.
 #' @param errorhandling A string "remove", "stop", or "pass". If an error occurs
 #'   in any iteration, remove that iteration (remove), return the error message
 #'   verbatim in the output (pass), or terminate the loop (stop). Default is
-#'   "remove". See R package `foreach` for more details.
-#' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
+#'   "remove". See R package 'foreach' for more details.
+#' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR.
 #' @param cluster_export A vector of functions to pass to the
-#'   parallel-processing clusters
-#' @return A SimCurve object. Attributes: s: a number, snr: a number or list of
-#'   numbers, n: a number or list of numbers, xmod: a MixtureModel, ymod: one or
-#'   a list of OutcomeModels, imod: an InferenceModel, sims: a list of
-#'   simulation output matrices.
+#'   parallel-processing clusters.
+#' @return A SimCurve object with the following attributes:
+#' \describe{
+#'   \item{s}{a number of simulations.}
+#'   \item{snr}{a real number or array of real numbers for SNR of each OutcomeModel.}
+#'   \item{n}{a number or vector of sample sizes.}
+#'   \item{xmod}{the MixtureModel used.}
+#'   \item{ymod}{the OutcomeModel used.}
+#'   \item{imod}{the InferenceModel used.}
+#'   \item{sims}{a list of simulation output matrices.}
+#' }
+#' @examples
+#' data("nhanes1518")
+#' chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
+#' "URXMCOH", "URXMEP","URXMHBP", "URXMHH", "URXMHNC", "URXMHP", "URXMIB",
+#' "URXMNP", "URXMOH", "URXMZP")
+#' chems_mod <- mpower::MixtureModel(nhanes1518[, chems], method = "resampling")
+#' bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP +
+#' 0.1*URXCOP*URXECP", family = "binomial")
+#' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
+#' logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
+#' s=100, n=c(500, 1000, 2000), cores=2, snr_iter=2000)
+#' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_curve <- function(xmod, ymod, imod, s=100, n=100,
                       cores = 1, file = NULL, errorhandling = "stop",
@@ -68,14 +86,13 @@ new_SimCurve <- function(x = list()) {
   structure(x, class = "mpower_SimCurve")
 }
 
-
 #' Power analysis using Monte Carlo simulation
 #'
 #' @param xmod A MixtureModel object.
 #' @param ymod An OutcomeModel object.
 #' @param imod An InferenceModel object.
-#' @param s An integer for number of Monte Carlo simulation.
-#' @param n An interger for sample size in each simulation.
+#' @param s An integer for number of Monte Carlo simulations.
+#' @param n An integer for sample size in each simulation.
 #' @param cores An integer for number of processing cores. When cores > 1,
 #'   parallelism is automatically applied.
 #' @param file A string, a file name with no extension to write samples to
@@ -86,8 +103,28 @@ new_SimCurve <- function(x = list()) {
 #'   "remove". See R package `foreach` for more details.
 #' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
 #' @param cluster_export A vector of functions to pass to the parallel-processing clusters
-#' @return A PowerSim object. Attributes: xmod, ymod, imod, s, n, simulation
-#'   samples.
+#' @return A PowerSim object. Attributes:
+#' \describe{
+#'   \item{s}{a number of simulations.}
+#'   \item{snr}{a real number for SNR of the OutcomeModel.}
+#'   \item{n}{a number of sample sizes.}
+#'   \item{xmod}{the MixtureModel used.}
+#'   \item{ymod}{the OutcomeModel used.}
+#'   \item{imod}{the InferenceModel used.}
+#'   \item{sims}{an output matrices.}
+#' }
+#' @examples
+#' data("nhanes1518")
+#' chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
+#' "URXMCOH", "URXMEP","URXMHBP", "URXMHH", "URXMHNC", "URXMHP", "URXMIB",
+#' "URXMNP", "URXMOH", "URXMZP")
+#' chems_mod <- mpower::MixtureModel(nhanes1518[, chems], method = "resampling")
+#' bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP +
+#' 0.1*URXCOP*URXECP", family = "binomial")
+#' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
+#' logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
+#' s=100, n=2000, cores=2, snr_iter=2000)
+#' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
                       cores = 1, file = NULL, errorhandling = "stop",
@@ -138,30 +175,27 @@ sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
                sims = out))
 }
 
-#TODO: Add SNR attribute to this!
 new_Sim <- function(x = list()) {
   stopifnot(is.list(x))
   structure(x, class = "mpower_Sim")
 }
 
-
 #' Tabular and graphical summaries of power simulation
 #'
-#' @param sim A Sim or a SimCurve object, output from sim_power() or
-#'   sim_curve().
+#' @param sim A Sim or a SimCurve object, output from `sim_power()` or
+#'   `sim_curve()`.
 #' @param crit A string specifying the significance criteria.
-#' @param thres A number or vector of numbers spefifying the thresholds of
+#' @param thres A number or vector of numbers specifying the thresholds of
 #'   "significance".
 #' @param digits An integer for the number of decimal points to display.
-#' @param how A string, whether to compare crit 'greater' or 'lesser' than the
-#'   threshold
+#' @param how A string, whether to compare the criterion 'greater' or 'lesser'
+#'   than the threshold.
 #' @return A data.frame summary of power for each predictor for each combination
 #'   of thresholds, sample size, signal-to-noise ratios.
 #' @export
 summary <- function(sim, crit, thres, digits = 3, how = "greater") {
   UseMethod("summary", sim)
 }
-
 
 #' @export
 summary.mpower_Sim <- function(sim, crit, thres, digits = 3, how = "greater") {
@@ -271,7 +305,7 @@ summary_one_sim_one_thres <- function(sim, crit, thres, digits, how, pivot=FALSE
     abind::abind(along = -1) %>%
     tibble::as_tibble() %>%
     dplyr::summarise(dplyr::across(tidyselect::everything(), mean)) %>%
-    round(digits) %>%  #TODO: correct colnames???
+    round(digits) %>%
     dplyr::mutate(thres = thres)
   if (pivot) {
     res <- res %>%
@@ -279,4 +313,3 @@ summary_one_sim_one_thres <- function(sim, crit, thres, digits, how, pivot=FALSE
   }
   return(res)
 }
-

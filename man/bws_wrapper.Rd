@@ -16,13 +16,12 @@ bws_wrapper(y, x, args = list(iter = 2000))
 \value{
 A list
 \describe{
-  \item{beta}{The smaller posterior prob. of the combined overall effect
-  being to one side of zero: min(Pr(beta >0), Pr(beta<0)). The same for all
-  predictor.}
-  \item{weights}{The 95\% CI of the contribution of each predictor to the
-  overall effect. Between 0 and 1.}
-  \item{time}{elapsed time to fit the model}
-}
+  \item{beta}{The smaller posterior probability of
+  the combined overall effect being to one side of zero: min(Pr(beta >0),
+  Pr(beta<0)). The same for all predictor.}
+  \item{weights}{The 95\% CI of the
+  contribution of each predictor to the overall effect. Between 0 and 1.}
+  \item{time}{elapsed time to fit the model.} }
 }
 \description{
 Fits a Bayesian weighted sums
@@ -30,8 +29,9 @@ Fits a Bayesian weighted sums
 \section{Reference}{
 
 
-Hamra GB, MacLehose RF, Croen L, Kauffman EM, Newschaffer C (2021). “Bayesian
-weighted sums: a flexible approach to estimate summed mixture effects.”
-International Journal of Environmental Research and Public Health, 18(4), 1373.
+  Hamra GB, MacLehose RF, Croen L, Kauffman EM, Newschaffer C (2021).
+  “Bayesian weighted sums: a flexible approach to estimate summed mixture
+  effects.” International Journal of Environmental Research and Public
+  Health, 18(4), 1373.
 }
 
