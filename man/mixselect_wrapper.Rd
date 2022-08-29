@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{mixselect_wrapper}
 \alias{mixselect_wrapper}
-\title{Fits a MixSelect model with significance criterions: PIP, posterior
+\title{Fits a MixSelect model with significance criteria: PIP and posterior
 probability of being one one side of zero.}
 \usage{
 mixselect_wrapper(y, x, args = list())
@@ -17,7 +17,7 @@ mixselect_wrapper(y, x, args = list())
 \value{
 A list of vectors whose values are between 0 and 1.
 \describe{
-  \item{beta}{The smaller posterior prob. of being to one side of zero
+  \item{beta}{The smaller posterior probability of being to one side of zero
   for linear term, given either the main effect or interaction is non-zero}
   \item{linear_pip}{PIP of a linear main effect or interaction}
   \item{gp_pip}{PIP of a non-linear effect}
@@ -26,14 +26,14 @@ A list of vectors whose values are between 0 and 1.
   \item{time}{elapsed time to fit the model} }
 }
 \description{
-Fits a MixSelect model with significance criterions: PIP, posterior
+Fits a MixSelect model with significance criteria: PIP and posterior
 probability of being one one side of zero.
 }
 \section{Reference}{
 
 
   Ferrari F, Dunson DB (2020). “Identifying main effects and interactions
-  among exposuresusing Gaussian processes.”Annals Applied Statistics,14(4),
+  among exposures using Gaussian processes.”Annals Applied Statistics,14(4),
   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
 }
 

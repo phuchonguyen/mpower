@@ -7,12 +7,13 @@
 mplot(obj, split = TRUE)
 }
 \arguments{
-\item{obj}{A MixtureModel object}
+\item{obj}{A MixtureModel object.}
 
-\item{split}{A logical, whether to display numbers on half of the covariance matrix}
+\item{split}{A logical, whether to display numbers on half of the covariance
+matrix.}
 }
 \value{
-ggplot2 graphics
+ggplot2 graphics.
 }
 \description{
 Visualize marginals and Gaussian copula correlations of simulated data

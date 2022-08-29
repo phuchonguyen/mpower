@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim.R
 \name{sim_curve}
 \alias{sim_curve}
-\title{Power analysis for multiple settings using Monte Carlo simulation}
+\title{Power curve using Monte Carlo simulation}
 \usage{
 sim_curve(
   xmod,
@@ -24,11 +24,11 @@ sim_curve(
 
 \item{imod}{An InferenceModel object.}
 
-\item{s}{An integer for number of Monte Carlo simulation.}
+\item{s}{An integer for the number of Monte Carlo simulations.}
 
-\item{n}{An interger or a vector of sample sizes.}
+\item{n}{An integer or a vector of sample sizes.}
 
-\item{cores}{An integer for number of processing cores. When cores > 1,
+\item{cores}{An integer for the number of processing cores. When cores > 1,
 parallelism is automatically applied.}
 
 \item{file}{A string, a file name with no extension to write samples to
@@ -37,20 +37,39 @@ periodically. By default write to an RDS file.}
 \item{errorhandling}{A string "remove", "stop", or "pass". If an error occurs
 in any iteration, remove that iteration (remove), return the error message
 verbatim in the output (pass), or terminate the loop (stop). Default is
-"remove". See R package `foreach` for more details.}
+"remove". See R package 'foreach' for more details.}
 
-\item{snr_iter}{An integer for number of Monte Carlo samples to estimate SNR}
+\item{snr_iter}{An integer for number of Monte Carlo samples to estimate SNR.}
 
 \item{cluster_export}{A vector of functions to pass to the
-parallel-processing clusters}
+parallel-processing clusters.}
 }
 \value{
-A SimCurve object. Attributes: s: a number, snr: a number or list of
-  numbers, n: a number or list of numbers, xmod: a MixtureModel, ymod: one or
-  a list of OutcomeModels, imod: an InferenceModel, sims: a list of
-  simulation output matrices.
+A SimCurve object with the following attributes:
+\describe{
+  \item{s}{a number of simulations.}
+  \item{snr}{a real number or array of real numbers for SNR of each OutcomeModel.}
+  \item{n}{a number or vector of sample sizes.}
+  \item{xmod}{the MixtureModel used.}
+  \item{ymod}{the OutcomeModel used.}
+  \item{imod}{the InferenceModel used.}
+  \item{sims}{a list of simulation output matrices.}
+}
 }
 \description{
 This function can be used to create power curves by calling sim_power() on
-combinations of its inputs.
+combinations of many sample sizes and signal-to-noise ratio (SNR).
+}
+\examples{
+data("nhanes1518")
+chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
+"URXMCOH", "URXMEP","URXMHBP", "URXMHH", "URXMHNC", "URXMHP", "URXMIB",
+"URXMNP", "URXMOH", "URXMZP")
+chems_mod <- mpower::MixtureModel(nhanes1518[, chems], method = "resampling")
+bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP +
+0.1*URXCOP*URXECP", family = "binomial")
+logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
+logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
+s=100, n=c(500, 1000), cores=1, snr_iter=2000)
+logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 }

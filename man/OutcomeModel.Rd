@@ -7,12 +7,12 @@
 OutcomeModel(f, family = "gaussian", sigma = 1, f_args = list())
 }
 \arguments{
-\item{f}{A string that describes the relationships between the
-predictors and outcome or a function that takes an input matrix and returns
-a vector of outcome: \eqn{E(y|x) = g(f(x))} where g is a link function
-that depends on the family argument.}
+\item{f}{A string that describes the relationships between the predictors and
+outcome or a function that takes an input matrix and returns a vector of
+outcome: \eqn{E(y|x) = g(f(x))} where g is a link function that depends on
+the family argument.}
 
-\item{family}{A string, "gaussian", "binomial", or "poisson" for continuous,
+\item{family}{A string, 'gaussian', 'binomial', or 'poisson' for continuous,
 binary, or count outcomes.}
 
 \item{sigma}{A number, Gaussian noise standard deviation if applicable.}
@@ -20,10 +20,14 @@ binary, or count outcomes.}
 \item{f_args}{A named list of additional arguments to f}
 }
 \value{
-An OutcomeModel object. Attributes: f: mean function, sigma: a number Gaussian
-  observation noise, family: a string "gaussian" or "binomial".
+An OutcomeModel object. Attributes: f: mean function, sigma: a number
+  Gaussian observation noise, family: a string 'gaussian' or 'binomial'.
 }
 \description{
 This function creates a generative model of the outcome given a matrix of
 predictors.
+}
+\examples{
+# Define BMI as a ratio of weight and height plus random Gaussian error with standard deviation 1.
+bmi_model <- mpower::OutcomeModel(f = 'weight/(height^2)', sigma = 1, family = 'gaussian')
 }

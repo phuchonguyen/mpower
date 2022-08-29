@@ -12,7 +12,7 @@
 #'   \item{RIDSTATR}{Interview/Examination status}
 #'   \item{RIAGENDR}{Gender of the participant}
 #'   \item{RIDAGEYR}{Age in years of the participant at the time of screening.
-#'   Individuals 80 and over are topcoded at 80 years of age.}
+#'   Individuals 80 and over are top-coded at 80 years of age.}
 #'   \item{INDFMPIR}{A ratio of family income to poverty guidelines}
 #'   \item{RIDRETH1}{Race/Hispanic origin}
 #'   \item{INDHHIN2}{Total household income (reported as a range value in dollars)}
@@ -33,8 +33,8 @@
 "nhanes1518"
 
 
-
-#' Data from a study TODO CITE
-#' @format TODO
-#' @source TODO
+#' Data from Wu B, Jiang Y, Jin X, He L (2020). “Using three statistical methods to analyze the association
+#' between exposure to 9 compounds and obesity in children and adolescents: NHANES 2005-
+#' 2010.” Environmental Health, 19(94)
+#' @source \url{https://ehjournal.biomedcentral.com/articles/10.1186/s12940-020-00642-6}
 "nhanes"

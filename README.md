@@ -4,25 +4,27 @@
 # mpower
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/phuchonguyen/mpower/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/phuchonguyen/mpower/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 This package allows users to conduct power analysis based on Monte Carlo
-simulations in settings in which consideration of the correlations
-between predictors is important. It runs power analyses given a data
-generative model and an inference model. It can estimate a data
-generative model that preserves dependence structures among variables
-given existing data (continuous, binary, or ordinal) or high-level
+simulations in settings in which considerations of the correlations
+between predictors are important. It runs power analyses given a data
+generative model and an inference model. It can set up a data generative
+model that preserves dependence structures among variables given
+existing data (continuous, binary, or ordinal) or high-level
 descriptions of the associations. Users can generate power curves to
 assess the trade-offs between sample size, effect size, and power of a
 design.
 
 This vignette presents tutorials and examples focusing on applications
-for environmental mixtures when predictors tend to be moderately to
-highly correlated. It easily interfaces with several existing and newly
-developed analysis strategies for assessing associations between
-exposures to mixtures and health outcomes. However, the package is
-sufficiently general to facilitate power simulations in a wide variety
-of settings.
+for environmental mixtures studies where predictors tend to be
+moderately to highly correlated. It easily interfaces with several
+existing and newly developed analysis strategies for assessing
+associations between exposures to mixtures and health outcomes. However,
+the package is sufficiently general to facilitate power simulations in a
+wide variety of settings.
 
 ## Installation
 
@@ -61,13 +63,13 @@ To do power analysis using Monte Carlo simulations, we’ll need:
 -   A “significance” criterion and threshold for the inference model.
     For instance, the t-test in a linear regression has its p-value as
     the “significance” criterion, and a common threshold for statistical
-    significance is 0.05.
+    significance is p-value less than 0.05.
 
 ### Example 1: Power curve
 
 #### Generate predictors with C-vine
 
-we can manually specify the joint distribution of the predictors using
+We can manually specify the joint distribution of the predictors using
 univariate marginal distributions and a guess of the correlation matrix.
 To create four moderately associated mixed-scaled predictors:
 
@@ -89,7 +91,7 @@ mpower::mplot(xmod)
 #### Define outcome models
 
 Since we want to create a power curve, we need to supply a list of
-outcome models with different effect sizes:
+outcome models with different “true” effect sizes:
 
 ``` r
 ymod_list <- list(
@@ -272,10 +274,10 @@ ymod <- mpower::OutcomeModel(f = f_demo, family = "gaussian",
     sigma = sigma(lm_demo))
 ```
 
-#### Use the built-in glm model
+#### Use the built-in `glm` model
 
-We need to give glm the family and formula inputs. See documentation of
-glm for more options.
+We need to give `glm` the family and formula inputs. See documentation
+of `glm` for more options.
 
 ``` r
 # pass the formula argument to glm()
@@ -340,10 +342,10 @@ curve_df <- mpower::summary(curve, crit = "pval", thres = 0.05, how = "lesser")
 
 #### Usage of other built-in inference models
 
-Here are examples of how to use other inference models included in the
-package.
+Here are examples of how to use other statistical inference models
+included in the package.
 
-###### Bayesian weighted sums
+###### Bayesian weighted sums (BWS)
 
 “Significant” is when the credible intervals don’t include zero. We
 access the 95% credible interval coverage with criterion “beta” and
@@ -395,46 +397,60 @@ bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000,
 
 ``` r
 ms_imod <- InferenceModel(model = "ms", nrun = 5000, verbose=F)
-ms_power <- sim_power(xmod, ymod, ms_imod, s = 50, n = 100, 
+# Can expect run time for sample size of 1000 with 100 MC simulations 
+# to be very long.
+ms_power <- sim_power(xmod, ymod, ms_imod, s = 100, n = 1000, 
                        cores=1, snr_iter=1000, errorhandling = "stop")
 ```
 
 ### Example 4: Logistic regression example
 
-We show how to work with binary outcome here. See section 5 in our paper
-for more details. Data can be downloaded at:
-ttps://ehjournal.biomedcentral.com/articles/10.1186/s12940-020-00642-6
+We show how to work with a binary outcome here. We load NHANES data from
+the 2015-2016 and 2017-2018 cycles included in our package and define a
+“true” outcome model that includes linear main effects and an
+interaction. We check the power to detect these effects using a logistic
+regression and a sample size of 2000 observations.
 
 ``` r
-chems <- c("UrinaryBisphenolA", "UrinaryBenzophenone3", "Methylparaben", "Propylparaben", "dichlorophenol25", "dichlorophenol24", "MBzP", "MEP", "MiBP")
-chems_mod <- mpower::MixtureModel(nhanes[, chems], method = "estimation")
-bmi_mod <- mpower::OutcomeModel(f = "0.14*dichlorophenol25 + 0.15*MEP + 0.05*MEP*Methylparaben", family = "binomial")
+data("nhanes1518")
+chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1", "URXMCOH", "URXMEP",
+"URXMHBP", "URXMHH", "URXMHNC", "URXMHP", "URXMIB", "URXMNP", "URXMOH", "URXMZP")
+chems_mod <- mpower::MixtureModel(nhanes1518[, chems] %>% filter(complete.cases(.)),
+                                  method = "resampling")
+bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP + 0.1*URXCOP*URXECP", family = "binomial")
 logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-                 s=50, n=2000,cores=2)
+                 s=100, n=2000, cores=2, snr_iter=5000)
 ```
 
 ``` r
 logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #> 
 #>  *** POWER ANALYSIS SUMMARY ***
-#> Number of Monte Carlo simulations: 50
+#> Number of Monte Carlo simulations: 100
 #> Number of observations in each simulation: 2000
-#> Data generating process estimated SNR: 0.01
+#> Data generating process estimated SNR: 0.65
 #> Inference model: glm
 #> Significance criterion: pval
 #> 
 #> Significance threshold:  0.05
 #> 
-#> |                     | power|
-#> |:--------------------|-----:|
-#> |UrinaryBisphenolA    |  0.08|
-#> |UrinaryBenzophenone3 |  0.06|
-#> |Methylparaben        |  0.20|
-#> |Propylparaben        |  0.06|
-#> |dichlorophenol25     |  0.32|
-#> |dichlorophenol24     |  0.02|
-#> |MBzP                 |  0.06|
-#> |MEP                  |  0.70|
-#> |MiBP                 |  0.16|
+#> |        | power|
+#> |:-------|-----:|
+#> |URXCNP  |  0.17|
+#> |URXCOP  |  0.99|
+#> |URXECP  |  0.93|
+#> |URXHIBP |  0.03|
+#> |URXMBP  |  0.02|
+#> |URXMC1  |  0.03|
+#> |URXMCOH |  0.02|
+#> |URXMEP  |  0.04|
+#> |URXMHBP |  0.03|
+#> |URXMHH  |  0.04|
+#> |URXMHNC |  0.04|
+#> |URXMHP  |  0.07|
+#> |URXMIB  |  0.03|
+#> |URXMNP  |  0.05|
+#> |URXMOH  |  0.08|
+#> |URXMZP  |  0.03|
 ```

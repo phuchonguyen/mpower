@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{bkmr_wrapper}
 \alias{bkmr_wrapper}
-\title{Fits a BKMR model with significance criterions: PIP and group-wise PIP}
+\title{Fits a BKMR model with significance criteria: PIP and group-wise PIP}
 \usage{
 bkmr_wrapper(y, x, args = list())
 }
@@ -17,19 +17,19 @@ bkmr_wrapper(y, x, args = list())
 A list of vectors whose values are between 0 and 1
 \describe{
   \item{pip}{PIP for component-wise selection or conditional (with-in group)
-  PIP for hierarchical variable selection}
-  \item{group_pip}{PIP for group-specific selection}
-  \item{time}{elapsed time to fit the model}
+  PIP for hierarchical variable selection.}
+  \item{group_pip}{PIP for group-specific selection.}
+  \item{time}{elapsed time to fit the model.}
 }
 }
 \description{
-Fits a BKMR model with significance criterions: PIP and group-wise PIP
+Fits a BKMR model with significance criteria: PIP and group-wise PIP
 }
 \section{Reference}{
 
 
   Bobb JF, Henn BC, Valeri L, Coull BA (2018). “Statistical software for
-  analyzing the healtheffects of multiple concurrent exposures via Bayesian
+  analyzing the health effects of multiple concurrent exposures via Bayesian
   kernel machine regression.”Environ-mental
   Health,17(67).doi:10.1186/s12940-018-0413-y.
 }

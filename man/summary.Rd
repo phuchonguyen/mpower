@@ -7,18 +7,18 @@
 summary(sim, crit, thres, digits = 3, how = "greater")
 }
 \arguments{
-\item{sim}{A Sim or a SimCurve object, output from sim_power() or
-sim_curve().}
+\item{sim}{A Sim or a SimCurve object, output from `sim_power()` or
+`sim_curve()`.}
 
 \item{crit}{A string specifying the significance criteria.}
 
-\item{thres}{A number or vector of numbers spefifying the thresholds of
+\item{thres}{A number or vector of numbers specifying the thresholds of
 "significance".}
 
 \item{digits}{An integer for the number of decimal points to display.}
 
-\item{how}{A string, whether to compare crit 'greater' or 'lesser' than the
-threshold}
+\item{how}{A string, whether to compare the criterion 'greater' or 'lesser'
+than the threshold.}
 }
 \value{
 A data.frame summary of power for each predictor for each combination

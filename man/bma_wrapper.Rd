@@ -2,8 +2,9 @@
 % Please edit documentation in R/inference.R
 \name{bma_wrapper}
 \alias{bma_wrapper}
-\title{Fits a linear model with Bayesian model selection with significance
-criterions: PIP, posterior prob. of coefs. being on one side of zero.}
+\title{Fits a linear model with Bayesian model selection with significance criteria:
+PIP and posterior probability of nonzero coefficients being on one side of
+zero.}
 \usage{
 bma_wrapper(y, x, args = list())
 }
@@ -17,20 +18,21 @@ bma_wrapper(y, x, args = list())
 \value{
 A list of vectors whose values are between 0 and 1
 \describe{
-  \item{beta}{The smaller posterior prob. of the coefs being to one side of
-  zero: min(Pr(beta >0), Pr(beta<0))}
-  \item{pip}{PIP of the effect not being zero}
-  \item{time}{elapsed time to fit the model}
-}
+  \item{beta}{The smaller posterior probability of the coefficients being to
+  one side of zero: min(Pr(beta >0), Pr(beta<0)).}
+  \item{pip}{PIP of the
+  effect not being zero.}
+  \item{time}{elapsed time to fit the model.} }
 }
 \description{
-Fits a linear model with Bayesian model selection with significance
-criterions: PIP, posterior prob. of coefs. being on one side of zero.
+Fits a linear model with Bayesian model selection with significance criteria:
+PIP and posterior probability of nonzero coefficients being on one side of
+zero.
 }
 \section{Reference}{
 
 
-  Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA:  Bayesian
-  modelaveraging.  R package version 3.18.15.
+  Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA: Bayesian
+  model averaging. R package version 3.18.15.
 }
 

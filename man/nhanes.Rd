@@ -3,17 +3,21 @@
 \docType{data}
 \name{nhanes}
 \alias{nhanes}
-\title{Data from a study TODO CITE}
+\title{Data from Wu B, Jiang Y, Jin X, He L (2020). “Using three statistical methods to analyze the association
+between exposure to 9 compounds and obesity in children and adolescents: NHANES 2005-
+2010.” Environmental Health, 19(94)}
 \format{
-TODO
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 2372 rows and 25 columns.
 }
 \source{
-TODO
+\url{https://ehjournal.biomedcentral.com/articles/10.1186/s12940-020-00642-6}
 }
 \usage{
 nhanes
 }
 \description{
-Data from a study TODO CITE
+Data from Wu B, Jiang Y, Jin X, He L (2020). “Using three statistical methods to analyze the association
+between exposure to 9 compounds and obesity in children and adolescents: NHANES 2005-
+2010.” Environmental Health, 19(94)
 }
 \keyword{datasets}

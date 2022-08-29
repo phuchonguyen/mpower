@@ -16,8 +16,8 @@ glm_wrapper(y, x, args = list())
 \value{
 A list
 \describe{
-  \item{pval}{The p-value of the linear main effect}
-  \item{time}{elapsed time to fit the model}
+  \item{pval}{The p-value of the linear main effect.}
+  \item{time}{elapsed time to fit the model.}
 }
 }
 \description{

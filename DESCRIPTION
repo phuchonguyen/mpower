@@ -11,12 +11,15 @@ Authors@R:
 Description: Power analysis using Monte Carlo simulation is flexible and
     compatible with a large class of statistical models, especially when
     closed-formed power equations aren't available. This package allows users
-    to conduct power analysis using simulation in settings in which consideration
-    of the correlations between predictors is important. Users can set up
+    to conduct power analysis using simulation in settings in which considerations
+    of the correlations between predictors are important. Users can set up
     a data generative model that preserves dependence structures among
-    variables given existing data (continuous, binary, or ordinal). Users can
+    predictors given existing data (continuous, binary, or ordinal). Users can
     also generate power curves to assess the trade-offs between sample size,
-    effect size, and power of a design.
+    effect size, and power of a design. This package includes several statistical
+    models common in environmental mixtures studies such as generalized linear 
+    models with variable selections, Bayesian kernel machine regression, quantile
+    g-computation, and more.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
@@ -38,10 +41,7 @@ Imports:
     reshape2,
     tibble,
     tidyr,
-    tidyselect,
-    stats,
-    utils
-Remotes: phuchonguyen/bws
+    tidyselect
 RoxygenNote: 7.1.1
 Depends:
     R (>= 2.10)
@@ -58,6 +58,4 @@ Suggests:
     qgcomp,
     rmarkdown,
     rstan,
-    testthat,
-    truncnorm
-VignetteBuilder: knitr
+    testthat

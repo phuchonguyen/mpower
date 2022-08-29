@@ -20,7 +20,7 @@ MixtureModel(
 \item{method}{A string, one of the three options "resampling", "estimation",
 or "cvine". Default is "estimation". See Details.}
 
-\item{data}{A dataframe or matrix, required for "resampling" and "estimation"
+\item{data}{A dataframe or matrix, required for resampling" and "estimation"
 method.}
 
 \item{G}{A guesstimate pairwise correlation matrix for "cvine" method. See
@@ -32,7 +32,7 @@ larger means more uncertainty. Default is 100.}
 \item{nudge}{A number, default 10e-10 to add to the diagonal of the covariance
 matrix for numerical stability.}
 
-\item{sbg_args}{A list of named arguments, except Y, for function [sbgcop.mcmc()].}
+\item{sbg_args}{A list of named arguments, except Y, for function `sbgcop.mcmc()`.}
 
 \item{cvine_marginals}{A named list describing the univariate distribution
 of each predictor. See Details.}
@@ -51,10 +51,10 @@ predictors.
   There are three methods to generate data:
 
   1. Resampling: if we have enough data of the predictors, we can
-  resample to get realistic joint distributions and dependence amongst them.
+  resample to get realistic joint distributions and dependence among them.
 
   2. Estimation: if we have a small sample from, for example, a pilot study,
-  we can sample from a semiparametric copula model (Hoff 2007) after learning
+  we can sample from a semi-parametric copula model (Hoff 2007) after learning
   the dependence and univariate marginals of the predictors.
 
   3. C-vine: if no pilot data exists, we can still set rough guesstimate of
@@ -63,18 +63,24 @@ predictors.
   The guesstimate G is a symmetric p x p matrix whose ij-th item is between
   -1 and 1 and is the guesstimate correlation between predictor ith and jth.
   G doesn't need to be a valid correlation matrix. The method works well when
-  values in G are not extreme (i.e., 0.999, -0.999). Built-in univeriate
-  marginals include: qbeta , qbinom, qcauchy, qchisq, qexp, qf, qgamma, qgeom,
-  qhyper, qlogis, qlnorm, qmultinom, qnbinom, qnorm, qpois, qt, qunif, qweibull.
+  values in G are not extreme (i.e., 0.999, -0.999). Built-in functions for
+  univariate marginals include: `qbeta` , `qbinom`, `qcauchy`, `qchisq`, `qexp`, `qf`,
+  `qgamma`, `qgeom`, `qhyper`, `qlogis`, `qlnorm`, `qmultinom`, `qnbinom`,
+  `qnorm`, `qpois`, `qt`, `qunif`, `qweibull`.
 }
 
 \section{References}{
 
 
-  Hoff P (2007). "Extending the rank likelihood for
-  semiparametric copula estimation." Ann. Appl. Stat, 1(1), 265-283.
+  Hoff P (2007). 'Extending the rank likelihood for
+  semiparametric copula estimation.' Ann. Appl. Stat, 1(1), 265-283.
 
-  Joe H (2006). “Generting random correlation matrices based on partial
+  Joe H (2006). “Generating random correlation matrices based on partial
   correlations.”Journal of Multivariate Analysis, 97, 2177-2189.
 }
 
+\examples{
+data("nhanes1518")
+xmod <- mpower::MixtureModel(nhanes1518, method = "resampling")
+
+}
