@@ -39,7 +39,7 @@
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=100, n=c(500, 1000), cores=1, snr_iter=2000)
+#' s=50, n=c(500, 1000), cores=1, snr_iter=1000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_curve <- function(xmod,

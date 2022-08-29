@@ -105,49 +105,6 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
     return(mod$model(y = y, x = x, args = mod$args))
 }
 
-#' Fits a MixSelect model with significance criteria: PIP and posterior
-#' probability of being one one side of zero.
-#' @param x A matrix of predictors
-#' @param y A vector of outcome
-#' @param args A list of arguments, see https://github.com/fedfer/MixSelect
-#' @return A list of vectors whose values are between 0 and 1.
-#' \describe{
-#'   \item{beta}{The smaller posterior probability of being to one side of zero
-#'   for linear term, given either the main effect or interaction is non-zero}
-#'   \item{linear_pip}{PIP of a linear main effect or interaction}
-#'   \item{gp_pip}{PIP of a non-linear effect}
-#'   \item{pip}{PIP of either a linear
-#'   or non-linear effect}
-#'   \item{time}{elapsed time to fit the model} }
-#' @section Reference:
-#'
-#'   Ferrari F, Dunson DB (2020). “Identifying main effects and interactions
-#'   among exposures using Gaussian processes.”Annals Applied Statistics,14(4),
-#'   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
-mixselect_wrapper <- function(y, x, args = list()) {
-    x <- stats::model.matrix(~. - 1, x)
-    s <- Sys.time()
-    ms_out <- do.call(MixSelect, c(list(y = y, X = x), args))
-    ms_time <- Sys.time() - s
-    # Posterior probability of linear coefficients being on one side of zero
-    # (smaller side) For hypo testing, compare this with alpha/2 Since
-    # hierarchical variable selection: check main effect only
-    ms_beta <- (ms_out$beta * ms_out$gamma_beta) > 0  # ms_out$lambda * ms_out$gamma_int)
-    ms_beta <- apply(ms_beta, 2, mean, na.rm = T)
-    ms_beta <- vapply(ms_beta, function(x) min(x, 1 - x), numeric(1))
-    # PIP for linear term, either in linear or interaction
-    ms_beta_pip <- (ms_out$gamma_beta + ms_out$gamma_int) > 0
-    ms_beta_pip <- apply(ms_beta_pip, 2, mean, na.rm = T)
-    # PIP for GP term
-    ms_gp_pip <- apply(ms_out$gamma_l, 2, mean, na.rm = T)
-    # PIP for any term
-    ms_beta_gp_pip <- (ms_out$gamma_beta + ms_out$gamma_int + ms_out$gamma_l) > 0
-    ms_beta_gp_pip <- apply(ms_beta_gp_pip, 2, mean, na.rm = T)
-    names(ms_beta) <- names(ms_beta_pip) <- names(ms_gp_pip) <- names(ms_beta_gp_pip) <- colnames(x)
-    return(list(beta = ms_beta, linear_pip = ms_beta_pip, gp_pip = ms_gp_pip, pip = ms_beta_gp_pip,
-        time = ms_time))
-}
-
 #' Fits a BKMR model with significance criteria: PIP and group-wise PIP
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
