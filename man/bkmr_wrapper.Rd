@@ -29,7 +29,7 @@ Fits a BKMR model with significance criteria: PIP and group-wise PIP
 
 
   Bobb JF, Henn BC, Valeri L, Coull BA (2018). “Statistical software for
-  analyzing the healtheffects of multiple concurrent exposures via Bayesian
+  analyzing the health effects of multiple concurrent exposures via Bayesian
   kernel machine regression.”Environ-mental
   Health,17(67).doi:10.1186/s12940-018-0413-y.
 }

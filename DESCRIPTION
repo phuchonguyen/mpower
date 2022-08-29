@@ -17,8 +17,9 @@ Description: Power analysis using Monte Carlo simulation is flexible and
     predictors given existing data (continuous, binary, or ordinal). Users can
     also generate power curves to assess the trade-offs between sample size,
     effect size, and power of a design. This package includes several statistical
-    models common in environmental mixtures studies such as generalized linear model with 
-    variable selections, Bayesian kernel machine regression, quantile g-computation, and more.
+    models common in environmental mixtures studies such as generalized linear 
+    models with variable selections, Bayesian kernel machine regression, quantile
+    g-computation, and more.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
@@ -40,7 +41,6 @@ Imports:
     tibble,
     tidyr,
     tidyselect
-Remotes: phuchonguyen/bws
 RoxygenNote: 7.1.1
 Depends:
     R (>= 2.10)
@@ -55,4 +55,3 @@ Suggests:
     rmarkdown,
     rstan,
     testthat
-VignetteBuilder: knitr

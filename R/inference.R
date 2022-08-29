@@ -26,35 +26,35 @@ InferenceModel <- function(model, name = NULL, ...) {
     } else if (is.character(model)) {
         if (model == "bma") {
             if (!requireNamespace("BMA")) {
-                stop("Package BMA not installed.")
+                stop("Package 'BMA' not installed.")
             }
             mod[["model"]] <- bma_wrapper
         } else if (model == "bkmr") {
             if (!requireNamespace("bkmr")) {
-                stop("Package bkmr not installed.")
+                stop("Package 'bkmr' not installed.")
             }
             mod[["model"]] <- bkmr_wrapper
         } else if (model == "bws") {
             if (!requireNamespace("bws")) {
-                stop("Package bws not installed. Install at devtools::install_github('phuchonguyen/bws')")
+                stop("Package 'bws' not installed.")
             }
             message("Estimating the power of detecting the overall effect based on posterior credible interval. Running sim_power() with cores > 1 is recommended.")
             mod[["model"]] <- bws_wrapper
         } else if (model == "qgc") {
             if (!requireNamespace("qgcomp")) {
-                stop("Package qgcomp not installed.")
+                stop("Package 'qgcomp' not installed.")
             }
             mod[["model"]] <- qgcomp_lin_wrapper
         } else if (model == "fin") {
             if (!requireNamespace("infinitefactor")) {
-                stop("Package infinitefactor not installed.")
+                stop("Package 'infinitefactor' not installed.")
             }
             mod[["model"]] <- fin_wrapper
         } else if (model == "glm") {
             message("Estimating the power of conditional t-test on each regression coefficient.")
             mod[["model"]] <- glm_wrapper
         } else {
-            stop("`model` not implemented")
+            stop(paste(model, "not implemented"))
         }
     } else {
         stop("Invalid input for `model`")
@@ -122,7 +122,7 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
 #' @section Reference:
 #'
 #'   Ferrari F, Dunson DB (2020). “Identifying main effects and interactions
-#'   among exposuresusing Gaussian processes.”Annals Applied Statistics,14(4),
+#'   among exposures using Gaussian processes.”Annals Applied Statistics,14(4),
 #'   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
 mixselect_wrapper <- function(y, x, args = list()) {
     x <- stats::model.matrix(~. - 1, x)
@@ -162,7 +162,7 @@ mixselect_wrapper <- function(y, x, args = list()) {
 #' @section Reference:
 #'
 #'   Bobb JF, Henn BC, Valeri L, Coull BA (2018). “Statistical software for
-#'   analyzing the healtheffects of multiple concurrent exposures via Bayesian
+#'   analyzing the health effects of multiple concurrent exposures via Bayesian
 #'   kernel machine regression.”Environ-mental
 #'   Health,17(67).doi:10.1186/s12940-018-0413-y.
 #' @export
@@ -199,8 +199,8 @@ bkmr_wrapper <- function(y, x, args = list()) {
 #'   \item{time}{elapsed time to fit the model.} }
 #' @section Reference:
 #'
-#'   Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA:  Bayesian
-#'   modelaveraging.  R package version 3.18.15.
+#'   Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA: Bayesian
+#'   model averaging. R package version 3.18.15.
 #' @export
 bma_wrapper <- function(y, x, args = list()) {
     x <- stats::model.matrix(~., x)[, -1]  # full rank matrix with dummy variables

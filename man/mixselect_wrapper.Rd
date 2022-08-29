@@ -33,7 +33,7 @@ probability of being one one side of zero.
 
 
   Ferrari F, Dunson DB (2020). “Identifying main effects and interactions
-  among exposuresusing Gaussian processes.”Annals Applied Statistics,14(4),
+  among exposures using Gaussian processes.”Annals Applied Statistics,14(4),
   1743–1758.doi:https://doi.org/10.1214/20-AOAS1363.
 }
 

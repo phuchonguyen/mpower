@@ -37,8 +37,8 @@
 #'   The guesstimate G is a symmetric p x p matrix whose ij-th item is between
 #'   -1 and 1 and is the guesstimate correlation between predictor ith and jth.
 #'   G doesn't need to be a valid correlation matrix. The method works well when
-#'   values in G are not extreme (i.e., 0.999, -0.999). Built-in functions for univeriate
-#'   marginals include: `qbeta` , `qbinom`, `qcauchy`, `qchisq`, `qexp`, `qf`,
+#'   values in G are not extreme (i.e., 0.999, -0.999). Built-in functions for
+#'   univariate marginals include: `qbeta` , `qbinom`, `qcauchy`, `qchisq`, `qexp`, `qf`,
 #'   `qgamma`, `qgeom`, `qhyper`, `qlogis`, `qlnorm`, `qmultinom`, `qnbinom`,
 #'   `qnorm`, `qpois`, `qt`, `qunif`, `qweibull`.
 #'
@@ -51,7 +51,7 @@
 #'   Hoff P (2007). 'Extending the rank likelihood for
 #'   semiparametric copula estimation.' Ann. Appl. Stat, 1(1), 265-283.
 #'
-#'   Joe H (2006). “Generting random correlation matrices based on partial
+#'   Joe H (2006). “Generating random correlation matrices based on partial
 #'   correlations.”Journal of Multivariate Analysis, 97, 2177-2189.
 #' @export
 MixtureModel <- function(method = "estimation", data = NULL, G = NULL, m = 100, nudge = 1e-09,

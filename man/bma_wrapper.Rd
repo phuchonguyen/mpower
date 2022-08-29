@@ -32,7 +32,7 @@ zero.
 \section{Reference}{
 
 
-  Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA:  Bayesian
-  modelaveraging.  R package version 3.18.15.
+  Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA: Bayesian
+  model averaging. R package version 3.18.15.
 }
 

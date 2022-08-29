@@ -12,7 +12,7 @@
 #'   \item{RIDSTATR}{Interview/Examination status}
 #'   \item{RIAGENDR}{Gender of the participant}
 #'   \item{RIDAGEYR}{Age in years of the participant at the time of screening.
-#'   Individuals 80 and over are topcoded at 80 years of age.}
+#'   Individuals 80 and over are top-coded at 80 years of age.}
 #'   \item{INDFMPIR}{A ratio of family income to poverty guidelines}
 #'   \item{RIDRETH1}{Race/Hispanic origin}
 #'   \item{INDHHIN2}{Total household income (reported as a range value in dollars)}

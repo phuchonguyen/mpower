@@ -410,9 +410,7 @@ chems_mod <- mpower::MixtureModel(nhanes1518[, chems] %>% filter(complete.cases(
 bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP + 0.1*URXCOP*URXECP", family = "binomial")
 logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-                 s=100, n=2000, cores=2)
-#> Warning in genx.mpower_resampling_MixtureModel(xmod, n = m): Number of
-#> observations 5737 less than 10000. Samples are dependent.
+                 s=100, n=2000, cores=2, snr_iter=5000)
 ```
 
 ``` r

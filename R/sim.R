@@ -39,17 +39,25 @@
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=100, n=c(500, 1000, 2000), cores=2, snr_iter=2000)
+#' s=100, n=c(500, 1000), cores=1, snr_iter=2000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
-sim_curve <- function(xmod, ymod, imod, s=100, n=100,
-                      cores = 1, file = NULL, errorhandling = "stop",
-                      snr_iter = 10000, cluster_export = c()) {
-  stopifnot(class(xmod) %in% c("mpower_estimation_MixtureModel",
-                               "mpower_cvine_MixtureModel",
-                               "mpower_resampling_MixtureModel"))
-  stopifnot(class(imod) == "mpower_InferenceModel")
-  if (class(ymod) == "mpower_OutcomeModel") {
+sim_curve <- function(xmod,
+                      ymod,
+                      imod,
+                      s = 100,
+                      n = 100,
+                      cores = 1,
+                      file = NULL,
+                      errorhandling = "stop",
+                      snr_iter = 10000,
+                      cluster_export = c()
+                      ) {
+  stopifnot(inherits(xmod, "mpower_estimation_MixtureModel") |
+              inherits(xmod, "mpower_cvine_MixtureModel") |
+              inherits(xmod, "mpower_resampling_MixtureModel"))
+  stopifnot(inherits(imod, "mpower_InferenceModel"))
+  if (inherits(ymod, "mpower_OutcomeModel")) {
     ymod <- list(ymod)
   }
   sim_list <- list()
@@ -64,9 +72,15 @@ sim_curve <- function(xmod, ymod, imod, s=100, n=100,
       cur_ymod <- ymod[[j]]
       cur_file <- if(!is.null(file)) {paste(file, i, j, sep = "-")}
       print(paste("Simulation for n =", cur_n, "and the", j, "th outcome model"))
-      out <- sim_power(xmod = xmod, ymod = cur_ymod, imod = imod,
-                       s = s, n = cur_n, snr_iter = snr_iter,
-                       cores = cores, file = cur_file, errorhandling = errorhandling,
+      out <- sim_power(xmod = xmod,
+                       ymod = cur_ymod,
+                       imod = imod,
+                       s = s,
+                       n = cur_n,
+                       snr_iter = snr_iter,
+                       cores = cores,
+                       file = cur_file,
+                       errorhandling = errorhandling,
                        cluster_export = cluster_export)
       sim_list[[k]] <- out$sims
       ymod_list[[k]] <- out$ymod
@@ -77,7 +91,9 @@ sim_curve <- function(xmod, ymod, imod, s=100, n=100,
   }
   new_SimCurve(list(s = s, n = n_vec,
                     snr = rep(snr_vec/length(n), length(n)),
-                    xmod = xmod, ymod = ymod_list, imod = imod,
+                    xmod = xmod,
+                    ymod = ymod_list,
+                    imod = imod,
                     sims = sim_list))
 }
 
@@ -123,17 +139,25 @@ new_SimCurve <- function(x = list()) {
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=100, n=2000, cores=2, snr_iter=2000)
+#' s=100, n=2000, cores=1, snr_iter=2000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
-sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
-                      cores = 1, file = NULL, errorhandling = "stop",
-                      snr_iter = 10000, cluster_export = c()) {
-  stopifnot(class(xmod) %in% c("mpower_estimation_MixtureModel",
-                               "mpower_cvine_MixtureModel",
-                               "mpower_resampling_MixtureModel"))
-  stopifnot(class(ymod) == "mpower_OutcomeModel")
-  stopifnot(class(imod) == "mpower_InferenceModel")
+sim_power <- function(xmod,
+                      ymod,
+                      imod,
+                      s = 100,
+                      n = 100,
+                      cores = 1,
+                      file = NULL,
+                      errorhandling = "stop",
+                      snr_iter = 10000,
+                      cluster_export = c()
+                      ) {
+  stopifnot(inherits(xmod, "mpower_estimation_MixtureModel") |
+              inherits(xmod, "mpower_cvine_MixtureModel") |
+              inherits(xmod, "mpower_resampling_MixtureModel"))
+  stopifnot(inherits(ymod, "mpower_OutcomeModel"))
+  stopifnot(inherits(imod, "mpower_InferenceModel"))
   pb <- utils::txtProgressBar(max = s, style = 3)
   progress <- function(i) utils::setTxtProgressBar(pb, i)
   if (cores < 2) {
@@ -158,7 +182,9 @@ sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
     snow::clusterExport(cl, c(c("genx", "geny", "fit"), cluster_export))
     doSNOW::registerDoSNOW(cl)
     opts <- list(progress=progress)
-    out <- foreach::foreach(i = 1:s, .errorhandling=errorhandling, .options.snow=opts) %dopar% {
+    out <- foreach::foreach(i = 1:s,
+                            .errorhandling = errorhandling,
+                            .options.snow = opts) %dopar% {
       X <- genx(xmod, n)
       y <- geny(ymod, X)
       r <- fit(imod, X, y)
@@ -170,8 +196,12 @@ sim_power <- function(xmod, ymod, imod, s = 100, n = 100,
   }
   close(pb)
   snr <- estimate_snr(ymod, xmod, m = snr_iter)
-  new_Sim(list(s = s, n = n, snr = snr,
-               xmod = xmod, ymod = ymod, imod = imod,
+  new_Sim(list(s = s,
+               n = n,
+               snr = snr,
+               xmod = xmod,
+               ymod = ymod,
+               imod = imod,
                sims = out))
 }
 
