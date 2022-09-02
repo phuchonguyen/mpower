@@ -8,7 +8,7 @@
 #' @param beta Parameter for Beta distribution
 #' @param S A 'guess' of the correlation matrix
 #' @param m A number that indicates how much the random matrices vary from S
-#' @return A random positive-definite correlation matrix
+#' @value A random positive-definite correlation matrix
 cvine <- function(d, alpha = 10, beta = 10, S = NULL, m = 100) {
     if (!is.null(S))
         P0 <- cor2partial(S)
@@ -40,7 +40,7 @@ cvine <- function(d, alpha = 10, beta = 10, S = NULL, m = 100) {
 
 #' Convert a correlation matrix into a partial correlation matrix
 #' @param r A correlation matrix
-#' @return A partial correlation matrix
+#' @value A partial correlation matrix
 cor2partial <- function(r) {
     d <- nrow(r)
     if (d <= 2)

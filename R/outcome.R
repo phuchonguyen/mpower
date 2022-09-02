@@ -11,7 +11,7 @@
 #'   binary, or count outcomes.
 #' @param sigma A number, Gaussian noise standard deviation if applicable.
 #' @param f_args A named list of additional arguments to f
-#' @return An OutcomeModel object. Attributes: f: mean function, sigma: a number
+#' @value An OutcomeModel object. Attributes: f: mean function, sigma: a number
 #'   Gaussian observation noise, family: a string 'gaussian' or 'binomial'.
 #' @examples
 #' # Define BMI as a ratio of weight and height plus random Gaussian error with standard deviation 1.

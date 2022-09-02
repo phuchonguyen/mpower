@@ -2,16 +2,15 @@
 #' @param ymod A OutcomeModel object
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples
-#' @return An estimate SNR
+#' @value An estimate SNR and s.e.
 #' @export
-estimate_snr <- function(ymod, xmod, m = 5000) {
+estimate_snr <- function(ymod, xmod, m = 5000, R = 100) {
     X <- genx(xmod, n = m)
     mu <- ymod$f(X)
     if (ymod$family == "gaussian" & !is.null(ymod$sigma)) {
-        sigma_signal <- get_sigma_signal(mu, m, ymod$sigma)
-        return(sigma_signal/ymod$sigma^2)
+        return(get_sigma_signal(mu, m, ymod$sigma, R))
     } else if (ymod$family == "binomial") {
-        return(get_de_snr(mu))
+        return(get_de_snr(mu, R))
     } else if (ymod$family == "poisson") {
         s <- n <- 1
         warning("Poisson not implemented. Returning NA.")
@@ -33,7 +32,7 @@ rsq2snr <- function(r) {
 #' @param ymod A OutcomeModel object to modify
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples to estimate the SNR of a proposed noise variance
-#' @return A new OutcomeModel object
+#' @value A new OutcomeModel object
 #' @export
 scale_f <- function(snr, ymod, xmod, m = 5000) {
     if (ymod$family != "gaussian")
@@ -53,7 +52,7 @@ scale_f <- function(snr, ymod, xmod, m = 5000) {
 #' @param ymod A OutcomeModel object to modify
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples to estimate the SNR of a proposed noise variance
-#' @return A new OutcomeModel object
+#' @value A new OutcomeModel object
 #' @export
 scale_sigma <- function(snr, ymod, xmod, m = 5000) {
     if (ymod$family != "gaussian")
@@ -64,27 +63,27 @@ scale_sigma <- function(snr, ymod, xmod, m = 5000) {
     return(OutcomeModel(f = ymod$f, family = ymod$family, sigma = sqrt(sigma_signal/snr)))
 }
 
-get_sigma_signal <- function(mu, m, sigma) {
+get_sigma_signal <- function(mu, m, sigma, R) {
     statistics <- function(mu, idx) {
         sum((mu[idx] - mean(mu[idx]))^2)/(m - 1)
     }
-    out <- boot::boot(mu, statistics, R = 100)$t
-    message("Estimated SNR is ", round(mean(out/sigma^2), 4), " with bootstrap s.e. ",
-        round(stats::sd(out/sigma^2), 4))
-    return(mean(out))
+    out <- boot::boot(mu, statistics, R = R)
+    message("Estimated SNR is ", round(out$t0/sigma^2, 4), " with bootstrap s.e. ",
+        round(stats::sd(out$t/sigma^2), 4))
+    return(list(est=out$t0/sigma^2, se=stats::quantile(out$t/sigma^2, c(0.025, 0.975))))
 }
 
-get_de_snr <- function(mu) {
+get_de_snr <- function(mu, R) {
     statistics <- function(mu, idx) {
         y <- stats::rbinom(length(mu[idx]), size = 1, prob = mu[idx])
         de_noise <- binomial_de(y, mu[idx], 1)
         de_signal <- binomial_de(y, mean(y), 1) - de_noise
         de_signal/de_noise
     }
-    out <- boot::boot(mu, statistics, R = 100)$t
-    message("Estimated SNR is ", round(mean(out), 4), " with bootstrap s.e. ", round(stats::sd(out),
+    out <- boot::boot(mu, statistics, R = R)
+    message("Estimated SNR is ", round(out$t0, 4), " with bootstrap s.e. ", round(stats::sd(out$t),
         4))
-    return(mean(out))
+    return(list(est=out$t0, se=stats::quantile(out$t, c(0.025, 0.975))))
 }
 
 binomial_de <- function(y, mu, m) {

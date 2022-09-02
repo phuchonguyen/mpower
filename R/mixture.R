@@ -1,4 +1,3 @@
-# TODO: convert genx data to be numeric or factor depending on the input data.
 #' Correlated predictors generator
 #'
 #' This function creates a generative model for the correlated, mixed-scale
@@ -297,7 +296,7 @@ plot_corr <- function(C, title = "", split = TRUE) {
         return(g)
     }
     upper_C <- lower_C <- C
-    upper_C[lower.tri(C, diag = T)] <- NA
+    upper_C[lower.tri(C)] <- NA
     lower_C[upper.tri(C)] <- NA
     meltNum <- reshape2::melt(lower_C, na.rm = T)
     meltColor <- reshape2::melt(upper_C, na.rm = T)
