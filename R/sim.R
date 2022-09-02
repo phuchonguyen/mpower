@@ -19,7 +19,7 @@
 #' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR.
 #' @param cluster_export A vector of functions to pass to the
 #'   parallel-processing clusters.
-#' @value A SimCurve object with the following attributes:
+#' @return A SimCurve object with the following attributes:
 #' \describe{
 #'   \item{s}{a number of simulations.}
 #'   \item{snr}{a real number or array of real numbers for SNR of each OutcomeModel.}
@@ -119,7 +119,7 @@ new_SimCurve <- function(x = list()) {
 #'   "remove". See R package `foreach` for more details.
 #' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
 #' @param cluster_export A vector of functions to pass to the parallel-processing clusters
-#' @value A PowerSim object. Attributes:
+#' @return A PowerSim object. Attributes:
 #' \describe{
 #'   \item{s}{a number of simulations.}
 #'   \item{snr}{a real number for SNR of the OutcomeModel.}
@@ -220,7 +220,7 @@ new_Sim <- function(x = list()) {
 #' @param digits An integer for the number of decimal points to display.
 #' @param how A string, whether to compare the criterion 'greater' or 'lesser'
 #'   than the threshold.
-#' @value A data.frame summary of power for each predictor for each combination
+#' @return A data.frame summary of power for each predictor for each combination
 #'   of thresholds, sample size, signal-to-noise ratios.
 #' @export
 summary <- function(sim, crit, thres, digits = 3, how = "greater") {

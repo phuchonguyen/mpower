@@ -2,7 +2,7 @@
 #' @param ymod A OutcomeModel object
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples
-#' @value An estimate SNR and s.e.
+#' @return An estimate SNR and s.e.
 #' @export
 estimate_snr <- function(ymod, xmod, m = 5000, R = 100) {
     X <- genx(xmod, n = m)
@@ -32,7 +32,7 @@ rsq2snr <- function(r) {
 #' @param ymod A OutcomeModel object to modify
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples to estimate the SNR of a proposed noise variance
-#' @value A new OutcomeModel object
+#' @return A new OutcomeModel object
 #' @export
 scale_f <- function(snr, ymod, xmod, m = 5000) {
     if (ymod$family != "gaussian")
@@ -52,7 +52,7 @@ scale_f <- function(snr, ymod, xmod, m = 5000) {
 #' @param ymod A OutcomeModel object to modify
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples to estimate the SNR of a proposed noise variance
-#' @value A new OutcomeModel object
+#' @return A new OutcomeModel object
 #' @export
 scale_sigma <- function(snr, ymod, xmod, m = 5000) {
     if (ymod$family != "gaussian")

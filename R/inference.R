@@ -13,7 +13,7 @@
 #' @param name A string, name of the statistical model. Default to string input
 #'   of model.
 #' @param ... Additional keyword arguments for the statistical model
-#' @value An InferenceModel object.
+#' @return An InferenceModel object.
 #' @examples
 #' imod <- mpower::InferenceModel(model = 'glm', family = 'gaussian',
 #' formula = y ~ Poverty*(poly(Age, 2) + HHIncome + HomeOwn + Education))
@@ -72,7 +72,7 @@ new_InferenceModel <- function(l = list()) {
 #' @param mod An InferenceModel object
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
-#' @value A list of significance criteria
+#' @return A list of significance criteria
 #' \describe{
 #'   \item{beta}{The smaller
 #'   posterior probability of being to one side of zero for linear term, given
@@ -109,7 +109,7 @@ fit.mpower_InferenceModel <- function(mod, x, y) {
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
 #' @param args A list of arguments, see R function `bkmr::kmbayes()`
-#' @value A list of vectors whose values are between 0 and 1
+#' @return A list of vectors whose values are between 0 and 1
 #' \describe{
 #'   \item{pip}{PIP for component-wise selection or conditional (with-in group)
 #'   PIP for hierarchical variable selection.}
@@ -147,7 +147,7 @@ bkmr_wrapper <- function(y, x, args = list()) {
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
 #' @param args A list of arguments see R function `BMA::bic.glm()`.
-#' @value A list of vectors whose values are between 0 and 1
+#' @return A list of vectors whose values are between 0 and 1
 #' \describe{
 #'   \item{beta}{The smaller posterior probability of the coefficients being to
 #'   one side of zero: min(Pr(beta >0), Pr(beta<0)).}
@@ -180,7 +180,7 @@ bma_wrapper <- function(y, x, args = list()) {
 #' @param y A vector of outcome
 #' @param args A list of arguments see R function
 #'   `infinitefactor::interactionDL()` in 'infinitefactor' package.
-#' @value A list of vectors whose values are between 0 and 1
+#' @return A list of vectors whose values are between 0 and 1
 #' \describe{
 #'   \item{beta}{The smallest posterior probability of the coefficients being to
 #'   one side of zero for either main effect or interaction: min(Pr(beta >0),
@@ -229,7 +229,7 @@ fin_wrapper <- function(y, x, args = list(nrun = 2000)) {
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
 #' @param args A list of arguments see R function `qgcomp::qgcomp.noboot()`.
-#' @value A list
+#' @return A list
 #' \describe{
 #'   \item{pval}{The p-value of the combined effect, the
 #'   same for all predictors.}
@@ -259,7 +259,7 @@ qgcomp_lin_wrapper <- function(y, x, args = list()) {
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
 #' @param args A list of arguments see R `glm` function.
-#' @value A list
+#' @return A list
 #' \describe{
 #'   \item{pval}{The p-value of the linear main effect.}
 #'   \item{time}{elapsed time to fit the model.}
@@ -293,7 +293,7 @@ glm_wrapper <- function(y, x, args = list()) {
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
 #' @param args A list of arguments see R `bws::bws()`` function.
-#' @value A list
+#' @return A list
 #' \describe{
 #'   \item{beta}{The smaller posterior probability of
 #'   the combined overall effect being to one side of zero: min(Pr(beta >0),
