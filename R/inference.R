@@ -14,6 +14,9 @@
 #'   of model.
 #' @param ... Additional keyword arguments for the statistical model
 #' @return An InferenceModel object.
+#' \item{model}{a function that takes matrices of predictors and outcomes and
+#' returns a list of significance criteria.}
+#' \item{model_name}{a string.}
 #' @examples
 #' imod <- mpower::InferenceModel(model = 'glm', family = 'gaussian',
 #' formula = y ~ Poverty*(poly(Age, 2) + HHIncome + HomeOwn + Education))

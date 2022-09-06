@@ -63,6 +63,7 @@ cor2partial <- function(r) {
 #' @param r A correlation matrix
 #' @param x A vector of indices
 #' @param y A vector of indices
+#' @return A partial correlation matrix
 partial <- function(r, x, y) {
     rr <- r[c(x, y), ][, c(x, y)]
     rx <- 1:length(x)

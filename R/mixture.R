@@ -221,7 +221,7 @@ qmultinom <- function(p, probs) {
 #' @param obj A MixtureModel object.
 #' @param split A logical, whether to display numbers on half of the covariance
 #' matrix.
-#' @return 'ggplot2' graphics.
+#' @return A 'ggplot2' graphics.
 #' @export
 mplot <- function(obj, split = TRUE) {
     UseMethod("mplot")
