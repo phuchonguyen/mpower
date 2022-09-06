@@ -9,7 +9,10 @@ geny(obj, x)
 \arguments{
 \item{obj}{An OutcomeModel object}
 
-\item{x}{A matrix of predictors}
+\item{x}{An (n x p) matrix of predictors}
+}
+\value{
+An n-vector of outcomes
 }
 \description{
 Generates a vector of outcomes

@@ -15,12 +15,11 @@ qgcomp_lin_wrapper(y, x, args = list())
 }
 \value{
 A list
-\describe{
-  \item{pval}{The p-value of the combined effect, the
-  same for all predictors.}
-  \item{pos_weights}{Positive weights. See 'qgcomp' package.}
-  \item{neg_weights}{Negative weights. See 'qgcomp' package.}
-  \item{time}{elapsed time to fit the model.} }
+\item{pval}{The p-value of the combined effect, the
+same for all predictors.}
+\item{pos_weights}{Positive weights. See 'qgcomp' package.}
+\item{neg_weights}{Negative weights. See 'qgcomp' package.}
+\item{time}{elapsed time to fit the model.}
 }
 \description{
 Fits a linear Quantile G-Computation model with no interactions

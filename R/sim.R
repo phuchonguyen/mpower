@@ -224,6 +224,7 @@ summary <- function(sim, crit, thres, digits = 3, how = "greater") {
   UseMethod("summary", sim)
 }
 
+#' Plot summaries of power simulation
 #' @param sim A Sim or a SimCurve object, output from `sim_power()` or
 #'   `sim_curve()`.
 #' @param crit A string specifying the significance criteria.

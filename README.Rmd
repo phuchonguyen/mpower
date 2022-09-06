@@ -123,7 +123,7 @@ curve <- mpower::sim_curve(xmod, ymod_list, imod, s = 100,
 We can get a table of summaries and a plot of the power:
 
 ```{r curve-summary}
-curve_df <- mpower::summary(curve , crit = "pval", thres = 0.05, how = "lesser")
+curve_df <- mpower::summary(curve , crit = "pval", thres = 0.05, how = "lesser") 
 ```
 
 ```{r curve-plot-summary}
@@ -175,14 +175,12 @@ ymod <- mpower::OutcomeModel(sigma = 1, family = "gaussian",
 
 ```{r est-power, results='hide', fig.keep='all'}
 power <- mpower::sim_power(xmod, ymod, imod, s=1000, n=100, snr_iter=4800,
-                   cores = 2, errorhandling = "stop")
+                   cores = 2, errorhandling = "stop") 
 ```
 
 ```{r est-summary}
-power_df <- mpower::summary(power , crit = "pval", thres = 0.05, how = "lesser")
-mpower::plot_summary(power , crit = "pval", thres = 0.05, how = "lesser")
+power_df <- mpower::summary(power , crit = "pval", thres = 0.05, how = "lesser") 
 ```
-
 
 ### Example 3: Use the built-in inference models
 
@@ -250,7 +248,10 @@ curve <- mpower::sim_curve(xmod, ymod, imod,
 ```
 
 ```{r resamp-summary}
-curve_df <- mpower::summary(curve, crit = "pval", thres = 0.05, how = "lesser")
+curve_df <- mpower::summary(curve, crit = "pval", thres = 0.05, how = "lesser") 
+```
+
+```{r resamp-plot-summary}
 mpower::plot_summary(curve, crit = "pval", thres = 0.05, how = "lesser")
 ```
 

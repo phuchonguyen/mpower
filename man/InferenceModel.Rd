@@ -9,7 +9,7 @@ InferenceModel(model, name = NULL, ...)
 \arguments{
 \item{model}{A string of the name of a built-in statistical model or a function
 implements a statistical model and returns a list of significance
-criteria for each predictor. Built-in options include 'bma', 'bkmr', 'ms',
+criteria for each predictor. Built-in options include 'bma', 'bkmr', 'mixselect',
 'bws', 'qgc', 'fin', 'glm'.}
 
 \item{name}{A string, name of the statistical model. Default to string input
