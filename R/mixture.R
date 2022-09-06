@@ -113,19 +113,11 @@ new_estimation_MixtureModel <- function(data = numeric(), nudge = numeric(), var
         stop("Data must be numeric only. Convert ordinal factors to integer or
     use One-hot-encoding.")
     }
-    cat("\nEstimating the joint distribution using sbgcop\n")
+    message("\nEstimating the joint distribution using sbgcop\n")
     sbgcop_fit <- do.call(sbgcop::sbgcop.mcmc, c(list(Y = data), args))
-    cat("\n*** MCMC Summary ***")
-    cat("\nNumber of samples", sbgcop::summary.psgc(sbgcop_fit)$nsamp)
-    cat("\nEffective sample sizes")
-    print(sbgcop::summary.psgc(sbgcop_fit)$ESS)
-    # cat('\nSummary plots for univariate marginals, pair-wise correlation and
-    # regression parameters.') { sbgcop::plot.psgc(sbgcop_fit)
-    # mtext('Univariate marignals (left), pairwise correlation (middle),
-    # pairwise regression parameter (right)', outer = T, cex = 0.7) }
     R <- sbgcop_fit$C.psamp
     x <- list(data = data, R = R, var_name = var_name, var_dtypes = var_dtypes, p = ncol(data),
-        nudge = nudge)
+        nudge = nudge, sbgcop_summary = sbgcop::summary.psgc(sbgcop_fit))
     structure(x, class = "mpower_estimation_MixtureModel")
 }
 
