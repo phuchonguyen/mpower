@@ -40,7 +40,7 @@
 #'   univariate marginals include: `qbeta` , `qbinom`, `qcauchy`, `qchisq`, `qexp`, `qf`,
 #'   `qgamma`, `qgeom`, `qhyper`, `qlogis`, `qlnorm`, `qmultinom`, `qnbinom`,
 #'   `qnorm`, `qpois`, `qt`, `qunif`, `qweibull`.
-#'
+#' @return A MixtureModel object.
 #' @examples
 #' data("nhanes1518")
 #' xmod <- mpower::MixtureModel(nhanes1518, method = "resampling")
@@ -216,6 +216,7 @@ genx.mpower_cvine_MixtureModel <- function(obj, n) {
 #' Quantile function for the multinomial distribution, size = 1
 #' @param p A quantile.
 #' @param probs A vector of probabilities for each level.
+#' @return Gives the quantile function
 #' @export
 qmultinom <- function(p, probs) {
     stopifnot(all(probs < 1) & all(probs > 0))
@@ -228,7 +229,7 @@ qmultinom <- function(p, probs) {
 #' @param obj A MixtureModel object.
 #' @param split A logical, whether to display numbers on half of the covariance
 #' matrix.
-#' @return ggplot2 graphics.
+#' @return 'ggplot2' graphics.
 #' @export
 mplot <- function(obj, split = TRUE) {
     UseMethod("mplot")

@@ -2,7 +2,7 @@
 #' @param ymod A OutcomeModel object
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples
-#' @return An estimate SNR and s.e.
+#' @return An estimate SNR and 95-percent CI.
 #' @export
 estimate_snr <- function(ymod, xmod, m = 5000, R = 100) {
     X <- genx(xmod, n = m)
@@ -22,7 +22,6 @@ estimate_snr <- function(ymod, xmod, m = 5000, R = 100) {
 
 #' Convert R-squared value to the SNR
 #' @param r R-squared value
-#' @export
 rsq2snr <- function(r) {
     (1/r - 1)^(-1)
 }

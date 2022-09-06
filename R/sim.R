@@ -20,7 +20,6 @@
 #' @param cluster_export A vector of functions to pass to the
 #'   parallel-processing clusters.
 #' @return A SimCurve object with the following attributes:
-#' \describe{
 #'   \item{s}{a number of simulations.}
 #'   \item{snr}{a real number or array of real numbers for SNR of each OutcomeModel.}
 #'   \item{n}{a number or vector of sample sizes.}
@@ -28,7 +27,6 @@
 #'   \item{ymod}{the OutcomeModel used.}
 #'   \item{imod}{the InferenceModel used.}
 #'   \item{sims}{a list of simulation output matrices.}
-#' }
 #' @examples
 #' data("nhanes1518")
 #' chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
@@ -39,7 +37,7 @@
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=50, n=c(500, 1000), cores=1, snr_iter=1000)
+#' s=50, n=c(500, 1000), cores=2, snr_iter=1000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_curve <- function(xmod,
@@ -120,7 +118,6 @@ new_SimCurve <- function(x = list()) {
 #' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
 #' @param cluster_export A vector of functions to pass to the parallel-processing clusters
 #' @return A PowerSim object. Attributes:
-#' \describe{
 #'   \item{s}{a number of simulations.}
 #'   \item{snr}{a real number for SNR of the OutcomeModel.}
 #'   \item{n}{a number of sample sizes.}
@@ -128,7 +125,6 @@ new_SimCurve <- function(x = list()) {
 #'   \item{ymod}{the OutcomeModel used.}
 #'   \item{imod}{the InferenceModel used.}
 #'   \item{sims}{an output matrices.}
-#' }
 #' @examples
 #' data("nhanes1518")
 #' chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
@@ -139,7 +135,7 @@ new_SimCurve <- function(x = list()) {
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=100, n=2000, cores=1, snr_iter=2000)
+#' s=100, n=2000, cores=2, snr_iter=2000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_power <- function(xmod,

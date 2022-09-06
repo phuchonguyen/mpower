@@ -11,8 +11,10 @@
 #'   binary, or count outcomes.
 #' @param sigma A number, Gaussian noise standard deviation if applicable.
 #' @param f_args A named list of additional arguments to f
-#' @return An OutcomeModel object. Attributes: f: mean function, sigma: a number
-#'   Gaussian observation noise, family: a string 'gaussian' or 'binomial'.
+#' @return An OutcomeModel object. Attributes:
+#' \item{f}{mean function.}
+#' \item{sigma}{a number for the Gaussian observation noise.}
+#' \item{family}{a string 'gaussian' or 'binomial'.}
 #' @examples
 #' # Define BMI as a ratio of weight and height plus random Gaussian error with standard deviation 1.
 #' bmi_model <- mpower::OutcomeModel(f = 'weight/(height^2)', sigma = 1, family = 'gaussian')
@@ -90,7 +92,8 @@ new_OutcomeModel <- function(y = list()) {
 
 #' Generates a vector of outcomes
 #' @param obj An OutcomeModel object
-#' @param x A matrix of predictors
+#' @param x An (n x p) matrix of predictors
+#' @return An n-vector of outcomes
 #' @export
 geny <- function(obj, x) {
     UseMethod("geny")
