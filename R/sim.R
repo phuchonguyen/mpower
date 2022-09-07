@@ -269,7 +269,7 @@ plot_summary.mpower_SimCurve <- function(sim, crit, thres, digits = 3, how = "gr
   }
   if (length(unique(res$snr)) > 1) {
     g <- res %>%
-      dplyr::mutate(snr = as.factor(snr)) %>%
+      dplyr::mutate(snr = as.factor(!! sym("snr"))) %>%
       ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("snr"))) +
       geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
       geom_path() + geom_point() +

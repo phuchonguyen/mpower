@@ -2,6 +2,7 @@
 #' @param ymod A OutcomeModel object
 #' @param xmod A MixtureModel object
 #' @param m Number of MC samples
+#' @param R Number of bootstrap replicates
 #' @return An estimate SNR and 95-percent CI.
 #' @export
 estimate_snr <- function(ymod, xmod, m = 5000, R = 100) {

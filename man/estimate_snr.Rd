@@ -12,6 +12,8 @@ estimate_snr(ymod, xmod, m = 5000, R = 100)
 \item{xmod}{A MixtureModel object}
 
 \item{m}{Number of MC samples}
+
+\item{R}{Number of bootstrap replicates}
 }
 \value{
 An estimate SNR and 95-percent CI.

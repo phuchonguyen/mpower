@@ -19,6 +19,9 @@ of model.}
 }
 \value{
 An InferenceModel object.
+\item{model}{a function that takes matrices of predictors and outcomes and
+returns a list of significance criteria.}
+\item{model_name}{a string.}
 }
 \description{
 This function creates a wrapper function for a statistical model and its

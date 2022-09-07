@@ -234,7 +234,7 @@ mplot.mpower_resampling_MixtureModel <- function(obj, split = TRUE) {
         warning("Data must be numeric only to plot correlation matrix. Convert ordinal factors to integer or
     use One-hot-encoding.")
     } else{
-        g2 <- cor(obj$data, method = "spearman") %>%
+        g2 <- stats::cor(obj$data, method = "spearman") %>%
             reshape2::melt() %>%
             ggplot(aes(!!sym("Var2"), !!sym("Var1"), fill = !!sym("value"))) +
             geom_tile() +
