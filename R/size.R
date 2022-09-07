@@ -67,7 +67,7 @@ get_sigma_signal <- function(mu, m, sigma, R) {
         sum((mu[idx] - mean(mu[idx]))^2)/(m - 1)
     }
     out <- boot::boot(mu, statistics, R = R)
-    return(list(est=out$t0/sigma^2, se=stats::quantile(out$t/sigma^2, c(0.025, 0.975))))
+    return(list(est=out$t0/sigma^2, ci=stats::quantile(out$t/sigma^2, c(0.025, 0.975))))
 }
 
 get_de_snr <- function(mu, R) {
@@ -78,7 +78,7 @@ get_de_snr <- function(mu, R) {
         de_signal/de_noise
     }
     out <- boot::boot(mu, statistics, R = R)
-    return(list(est=out$t0, se=stats::quantile(out$t, c(0.025, 0.975))))
+    return(list(est=out$t0, ci=stats::quantile(out$t, c(0.025, 0.975))))
 }
 
 binomial_de <- function(y, mu, m) {
