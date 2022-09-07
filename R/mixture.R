@@ -230,10 +230,25 @@ mplot <- function(obj, split = TRUE) {
 #' @export
 mplot.mpower_resampling_MixtureModel <- function(obj, split = TRUE) {
     g1 <- plot_marginals(obj$data)
-    # C <- cor(genx(obj, 200), method = 'spearman') g2 <- plot_corr(C,
-    # split=FALSE, title = 'Spearman correlations of 200 resampled
-    # observations')
-    return(g1)
+    if (!is.numeric(as.matrix(obj$data))) {
+        warning("Data must be numeric only to plot correlation matrix. Convert ordinal factors to integer or
+    use One-hot-encoding.")
+    } else{
+        g2 <- cor(obj$data, method = "spearman") %>%
+            reshape2::melt() %>%
+            ggplot(aes(!!sym("Var2"), !!sym("Var1"), fill = !!sym("value"))) +
+            geom_tile() +
+            scale_fill_gradient2(low = "#0072B2", mid = "white", high = "#d55E00",
+                limit = c(-1, 1), name = "Spearman\nCorrelation") +
+            theme(plot.title = element_text(hjust = 0.5),
+                  axis.text.x = element_text(angle = 90),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  panel.background = element_blank()) +
+            coord_fixed() + labs(x = "", y = "", title = "Spearman correlation matrix of original data")
+        return(list(hist = g1, corr = g2))
+    }
+    return(list(hist = g1))
 }
 
 #' @export
