@@ -265,14 +265,15 @@ glm_wrapper <- function(y, x, args = list()) {
     s <- Sys.time()
     fit <- do.call(stats::glm, c(list(data = dat), args))
     time <- Sys.time() - s
-    p <- ncol(x)
+    var_names <- colnames(fit$model)[-1]
+    p <- length(var_names)
     all_pval <- stats::summary.glm(fit)$coef[, 4]
     all_int_pval <- all_pval[grepl("\\:", names(all_pval))]
     all_main_pval <- all_pval[!grepl("\\:", names(all_pval))]
     pval <- int_pval <- main_pval <- rep(NA, p)
-    names(pval) <- names(int_pval) <- names(main_pval) <- colnames(x)
+    names(pval) <- names(int_pval) <- names(main_pval) <- var_names
     # Save the smallest p-value of all terms with the variable name
-    for (var in colnames(x)) {
+    for (var in var_names) {
         int_pval[var] <- min(all_int_pval[grepl(var, names(all_int_pval))])
         main_pval[var] <- min(all_main_pval[grepl(var, names(all_main_pval))])
         pval[var] <- min(int_pval[var], main_pval[var])
