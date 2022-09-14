@@ -4,14 +4,14 @@
 #' The weights have been adjusted according to \url{https://wwwn.cdc.gov/nchs/nhanes/tutorials/module3.aspx}
 #'
 #' @format Data with the following variables:
+#' \describe{
 #'   \item{SEQN}{Respondent sequence number}
 #'   \item{WTINT4YR}{Full sample 4 year interview weight}
 #'   \item{WTMEC4YR}{Full sample 4 year MEC exam weight}
 #'   \item{WTSB4YR}{Environmental B 4-year weights}
 #'   \item{RIDSTATR}{Interview/Examination status}
 #'   \item{RIAGENDR}{Gender of the participant}
-#'   \item{RIDAGEYR}{Age in years of the participant at the time of screening.
-#'   Individuals 80 and over are top-coded at 80 years of age.}
+#'   \item{RIDAGEYR}{Age in years of the participant at the time of screening. Individuals 80 and over are top-coded at 80 years of age}
 #'   \item{INDFMPIR}{A ratio of family income to poverty guidelines}
 #'   \item{RIDRETH1}{Race/Hispanic origin}
 #'   \item{INDHHIN2}{Total household income (reported as a range value in dollars)}
@@ -19,25 +19,26 @@
 #'   \item{BMXWAIST}{Waist Circumference (cm)}
 #'   \item{BMXWT}{Weight (kg)}
 #'   \item{BMXHT}{Standing Height (cm)}
-#'   \item{URXUCR} {Creatinine, urine (mg/dL)}
-#'   \item{URXCNP} {\strong{MCNP} Mono(carboxyisononyl) phthalate (ng/mL), LLOD = 0.2}
-#'   \item{URXCOP} {\strong{MCOP} Mono(carboxyisoctyl) phthalate (ng/mL), LLOD = 0.3}
-#'   \item{URXECP} {\strong{MECPP} Mono-2-ethyl-5-carboxypentyl phthalate (ng/mL), LLOD =	0.4}
-#'   \item{URXHIBP}	{\strong{MHIBP} phthalate (ng/mL), LLOD =	0.4}
-#'   \item{URXMBP}	{\strong{MBP} Mono-n-butyl phthalate (ng/mL), LLOD =	0.4}
-#'   \item{URXMC1}	{\strong{MCPP} Mono-(3-carboxypropyl) phthalate (ng/mL), LLOD =	0.4}
-#'   \item{URXMCOH}	{\strong{MCOCH} phthalate (ng/mL), LLOD =	0.5}
-#'   \item{URXMEP}	{\strong{MEP} Mono-ethyl phthalate (ng/mL), LLOD =	1.2}
-#'   \item{URXMHBP}	{Mono-3-hydroxy-n-butyl phthalate (ng/mL), LLOD =	0.4}
-#'   \item{URXMHH}	{\strong{MEHHP} Mono-(2-ethyl-5-hydroxyhexyl) phthalate (ng/mL), LLOD =	0.4}
-#'   \item{URXMHNC}	{Cyclohexane 1,2-dicarboxylic acid monohydroxy isononyl ester (ng/mL), LLOD =	0.4}
-#'   \item{URXMHP}	{\strong{MEHP} Mono-(2-ethyl)-hexyl phthalate (ng/mL), LLOD =	0.8}
-#'   \item{URXMIB}	{\strong{MiBP} Mono-isobutyl phthalate (ng/mL), LLOD =	0.8}
-#'   \item{URXMNP}	{\strong{MCNP} Mono-isononyl phthalate (ng/mL), LLOD =	0.9}
-#'   \item{URXMOH}	{\strong{MEOHP} Mono-(2-ethyl-5-oxohexyl) phthalate (ng/mL), LLOD =	0.2}
-#'   \item{URXMZP}	{\strong{MBzP} Mono-benzyl phthalate (ng/mL), LLOD =	0.3}
+#'   \item{URXUCR}{Creatinine, urine (mg/dL)}
+#'   \item{URXCNP}{\strong{MCNP} Mono(carboxyisononyl) phthalate (ng/mL), LLOD = 0.2}
+#'   \item{URXCOP}{\strong{MCOP} Mono(carboxyisoctyl) phthalate (ng/mL), LLOD = 0.3}
+#'   \item{URXECP}{\strong{MECPP} Mono-2-ethyl-5-carboxypentyl phthalate (ng/mL), LLOD =	0.4}
+#'   \item{URXHIBP}{\strong{MHIBP} phthalate (ng/mL), LLOD =	0.4}
+#'   \item{URXMBP}{\strong{MnBP} Mono-n-butyl phthalate (ng/mL), LLOD =	0.4}
+#'   \item{URXMC1}{\strong{MCPP} Mono-(3-carboxypropyl) phthalate (ng/mL), LLOD =	0.4}
+#'   \item{URXMCOH}{\strong{MCOCH} phthalate (ng/mL), LLOD =	0.5}
+#'   \item{URXMEP}{\strong{MEP} Mono-ethyl phthalate (ng/mL), LLOD =	1.2}
+#'   \item{URXMHBP}{Mono-3-hydroxy-n-butyl phthalate (ng/mL), LLOD =	0.4}
+#'   \item{URXMHH}{\strong{MEHHP} Mono-(2-ethyl-5-hydroxyhexyl) phthalate (ng/mL), LLOD =	0.4}
+#'   \item{URXMHNC}{Cyclohexane 1,2-dicarboxylic acid monohydroxy isononyl ester (ng/mL), LLOD =	0.4}
+#'   \item{URXMHP}{\strong{MEHP} Mono-(2-ethyl)-hexyl phthalate (ng/mL), LLOD =	0.8}
+#'   \item{URXMIB}{\strong{MiBP} Mono-isobutyl phthalate (ng/mL), LLOD =	0.8}
+#'   \item{URXMNP}{\strong{MCNP} Mono-isononyl phthalate (ng/mL), LLOD =	0.9}
+#'   \item{URXMOH}{\strong{MEOHP} Mono-(2-ethyl-5-oxohexyl) phthalate (ng/mL), LLOD =	0.2}
+#'   \item{URXMZP}{\strong{MBzP} Mono-benzyl phthalate (ng/mL), LLOD =	0.3}
 #'   \item{URDCNPLC, URDCOPLC, URDECPLC, URDHIBLC, URDMBPLC, URDMC1LC, URDMCOLC, URDMEPLC,
 #'   URDMHBLC, URDMHHLC, URDMCHLC, URDMHPLC, URDMIBLC, URDMNPLC, URDMOHLC, URDMZPLC}{Phthalates comment code for whether the measurement is under the limit of detection}
+#' }
 #' @source Detailed documentation of the phthalates variables can be found here:
 #' \itemize{
 #'   \item \url{https://wwwn.cdc.gov/nchs/nhanes/search/default.aspx}
