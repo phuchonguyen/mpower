@@ -1,3 +1,12 @@
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Modified the DESCRIPTION to not start with title or "This package".
+* Added a reference to the paper for the package in DESCRIPTION. ##TODO: add doi to paper.
+* Added \value tags to geny.Rd, MixtureModel.Rd, qmultinom.Rd.
+* Removed print()/cat() from mixture.R and sim.R, except for in summary().
+* Updated all examples to use no more than 2 cores.
+
 ## Test Environments
 - ubuntu-gcc-release
 - macos-highsierra-release
@@ -20,7 +29,7 @@ New submission
 Uses the superseded packages: 'doSNOW', 'snow'
 ```
 
-I'm using 'doSNOW' and 'snow' because they support the display of progress bar inside 'foreach' loop, while 'doParallel' do not. 
+I'm using 'doSNOW' and 'snow' because they support the display of progress bar inside 'foreach' loop, while 'doParallel' do not.
 
 ```
 * checking for detritus in the temp directory ... NOTE
