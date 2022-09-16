@@ -16,7 +16,7 @@ Description: A flexible framework for power analysis using Monte
     assess the trade-offs between sample size, effect size, and power of a design.
     This package includes several statistical models common in environmental
     mixtures studies. For more details and tutorials, see Nguyen et al. (2022) <doi:...TODO>.
-License: GPL (>= 2)
+License: LGPL
 Encoding: UTF-8
 LazyData: true
 Imports:
