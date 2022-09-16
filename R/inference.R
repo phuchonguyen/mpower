@@ -56,7 +56,7 @@ InferenceModel <- function(model, name = NULL, ...) {
         } else if (model == "glm") {
             message("Estimating the power of conditional t-test on each regression coefficient.")
             mod[["model"]] <- glm_wrapper
-        } else if (model == "ms") {
+        } else if (model == "mixselect") {
           if (!(requireNamespace("bayesSurv") & requireNamespace("mvtnorm")
                 & requireNamespace("truncnorm") & requireNamespace("fields"))) {
             stop("At least one of packages bayesSurv, mvtnorm, truncnorm, or fields is not installed.")
