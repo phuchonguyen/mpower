@@ -24,7 +24,7 @@ test_that("resampling mixture works", {
   xmod <- mpower::MixtureModel(method = "resampling", data = nhanes_demo)
   X <- genx(xmod, 20)
   expect_equal(dim(X), c(20, 5))
-  expect_equal(any(class(mplot(xmod)[[1]]) %in% c("gg", "ggplot")), TRUE)
+  expect_equal(any(class(mplot(xmod)$hist[[1]]) %in% c("gg", "ggplot")), TRUE)
 })
 
 test_that("Gaussian copula mixture works", {

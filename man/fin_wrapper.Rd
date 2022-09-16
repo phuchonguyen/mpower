@@ -16,16 +16,14 @@ fin_wrapper(y, x, args = list(nrun = 2000))
 }
 \value{
 A list of vectors whose values are between 0 and 1
-\describe{
-  \item{beta}{The smallest posterior probability of the coefficients being to
-  one side of zero for either main effect or interaction: min(Pr(beta >0),
-  Pr(beta<0)).}
-  \item{linear_beta}{The smaller of posterior probability of
-  the main effects being to one side of zero.}
-  \item{interact_beta}{Same as
-  linear_beta but for pair-wise interactions.}
-  \item{time}{elapsed time to
-  fit the model.} }
+\item{beta}{The smallest posterior probability of the coefficients being to
+one side of zero for either main effect or interaction: min(Pr(beta >0),
+Pr(beta<0)).}
+\item{linear_beta}{The smaller of posterior probability of
+the main effects being to one side of zero.}
+\item{interact_beta}{Same as
+linear_beta but for pair-wise interactions.}
+\item{time}{elapsed time to fit the model.}
 }
 \description{
 Fits a Bayesian factor model with interactions

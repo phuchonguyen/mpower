@@ -1,6 +1,6 @@
 Package: mpower
 Type: Package
-Title: Power Analysis Using Monte Carlo Simulation
+Title: Power Analysis via Monte Carlo Simulation for Correlated Data
 Version: 0.1.0
 Authors@R:
     person(given = "Phuc H.",
@@ -8,19 +8,15 @@ Authors@R:
            role = c("aut", "cre"),
            email = "phuc.nguyen.rcran@gmail.com",
            comment = c(ORCID = "0000-0002-6206-0194"))
-Description: Power analysis using Monte Carlo simulation is flexible and
-    compatible with a large class of statistical models, especially when
-    closed-formed power equations aren't available. This package allows users
-    to conduct power analysis using simulation in settings in which considerations
-    of the correlations between predictors are important. Users can set up
-    a data generative model that preserves dependence structures among
-    predictors given existing data (continuous, binary, or ordinal). Users can
-    also generate power curves to assess the trade-offs between sample size,
-    effect size, and power of a design. This package includes several statistical
-    models common in environmental mixtures studies such as generalized linear 
-    models with variable selections, Bayesian kernel machine regression, quantile
-    g-computation, and more.
-License: GPL (>= 2)
+Description: A flexible framework for power analysis using Monte
+    Carlo simulation for settings in which considerations of the correlations
+    between predictors are important. Users can set up a data generative model
+    that preserves dependence structures among predictors given existing data
+    (continuous, binary, or ordinal). Users can also generate power curves to
+    assess the trade-offs between sample size, effect size, and power of a design.
+    This package includes several statistical models common in environmental
+    mixtures studies. For more details and tutorials, see Nguyen et al. (2022) <doi:...TODO>.
+License: LGPL
 Encoding: UTF-8
 LazyData: true
 Imports:
@@ -44,7 +40,7 @@ Imports:
     tidyselect
 RoxygenNote: 7.1.1
 Depends:
-    R (>= 2.10)
+    R (>= 3.5.0)
 Suggests:
     bayesSurv,
     BMA,
@@ -58,4 +54,5 @@ Suggests:
     qgcomp,
     rmarkdown,
     rstan,
-    testthat
+    testthat,
+    openxlsx

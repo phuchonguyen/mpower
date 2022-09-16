@@ -20,7 +20,6 @@
 #' @param cluster_export A vector of functions to pass to the
 #'   parallel-processing clusters.
 #' @return A SimCurve object with the following attributes:
-#' \describe{
 #'   \item{s}{a number of simulations.}
 #'   \item{snr}{a real number or array of real numbers for SNR of each OutcomeModel.}
 #'   \item{n}{a number or vector of sample sizes.}
@@ -28,7 +27,6 @@
 #'   \item{ymod}{the OutcomeModel used.}
 #'   \item{imod}{the InferenceModel used.}
 #'   \item{sims}{a list of simulation output matrices.}
-#' }
 #' @examples
 #' data("nhanes1518")
 #' chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
@@ -39,8 +37,9 @@
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=100, n=c(500, 1000), cores=1, snr_iter=2000)
+#' s=50, n=c(500, 1000), cores=2, snr_iter=1000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
+#' plot_summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_curve <- function(xmod,
                       ymod,
@@ -71,7 +70,7 @@ sim_curve <- function(xmod,
     for (j in seq_along(ymod)) {
       cur_ymod <- ymod[[j]]
       cur_file <- if(!is.null(file)) {paste(file, i, j, sep = "-")}
-      print(paste("Simulation for n =", cur_n, "and the", j, "th outcome model"))
+      message(paste("Simulation for n =", cur_n, "and the", j, "th outcome model"))
       out <- sim_power(xmod = xmod,
                        ymod = cur_ymod,
                        imod = imod,
@@ -120,7 +119,6 @@ new_SimCurve <- function(x = list()) {
 #' @param snr_iter An integer for number of Monte Carlo samples to estimate SNR
 #' @param cluster_export A vector of functions to pass to the parallel-processing clusters
 #' @return A PowerSim object. Attributes:
-#' \describe{
 #'   \item{s}{a number of simulations.}
 #'   \item{snr}{a real number for SNR of the OutcomeModel.}
 #'   \item{n}{a number of sample sizes.}
@@ -128,7 +126,6 @@ new_SimCurve <- function(x = list()) {
 #'   \item{ymod}{the OutcomeModel used.}
 #'   \item{imod}{the InferenceModel used.}
 #'   \item{sims}{an output matrices.}
-#' }
 #' @examples
 #' data("nhanes1518")
 #' chems <- c("URXCNP", "URXCOP", "URXECP", "URXHIBP", "URXMBP", "URXMC1",
@@ -139,8 +136,9 @@ new_SimCurve <- function(x = list()) {
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=100, n=2000, cores=1, snr_iter=2000)
+#' s=100, n=2000, cores=2, snr_iter=2000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
+#' plot_summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
 sim_power <- function(xmod,
                       ymod,
@@ -195,7 +193,7 @@ sim_power <- function(xmod,
     snow::stopCluster(cl)
   }
   close(pb)
-  snr <- estimate_snr(ymod, xmod, m = snr_iter)
+  snr <- estimate_snr(ymod, xmod, m = snr_iter)$est
   new_Sim(list(s = s,
                n = n,
                snr = snr,
@@ -210,8 +208,7 @@ new_Sim <- function(x = list()) {
   structure(x, class = "mpower_Sim")
 }
 
-#' Tabular and graphical summaries of power simulation
-#'
+#' Tabular summaries of power simulation
 #' @param sim A Sim or a SimCurve object, output from `sim_power()` or
 #'   `sim_curve()`.
 #' @param crit A string specifying the significance criteria.
@@ -225,6 +222,69 @@ new_Sim <- function(x = list()) {
 #' @export
 summary <- function(sim, crit, thres, digits = 3, how = "greater") {
   UseMethod("summary", sim)
+}
+
+#' Plot summaries of power simulation
+#' @param sim A Sim or a SimCurve object, output from `sim_power()` or
+#'   `sim_curve()`.
+#' @param crit A string specifying the significance criteria.
+#' @param thres A number or vector of numbers specifying the thresholds of
+#'   "significance".
+#' @param digits An integer for the number of decimal points to display.
+#' @param how A string, whether to compare the criterion 'greater' or 'lesser'
+#'   than the threshold.
+#' @return A 'ggplot2' graphics.
+#' @export
+plot_summary <- function(sim, crit, thres, digits = 3, how = "greater") {
+  UseMethod("plot_summary", sim)
+}
+
+#' @export
+plot_summary.mpower_Sim <- function(sim, crit, thres, digits = 3, how = "greater") {
+  if(seq_along(crit) > 1)  stop("Summary limited to one criteria", call. = FALSE)
+  if (length(thres) == 1) {
+    res <- summary_one_sim_one_thres(sim$sims, crit, thres, digits, how, pivot = T)
+  } else if (length(thres) > 1) {
+    # For many threshold and one Sim object
+    res <- summary_one_sim_many_thres(sim$sims, crit, thres, digits, how)
+  }
+  g <- res %>%
+    ggplot(aes(x = !! sym("thres"), y = !! sym("power"),
+               group = !! sym("test"), color = !! sym("test"))) +
+    geom_hline(yintercept = 0.8, linetype = 2, colour = "gray") +
+    geom_point() + geom_path() +
+    labs(y = "Type I error rate/ Power", x = "Significance threshold") +
+    scale_colour_discrete(name = "")
+  return(g)
+}
+
+#' @export
+plot_summary.mpower_SimCurve <- function(sim, crit, thres, digits = 3, how = "greater") {
+  if (length(thres) == 1) {
+    # For one threshold and many Sim objects
+    res <- summary_many_sim_one_thres(sim$sims, sim$n, sim$snr, crit, thres, digits, how)
+  } else {
+    warning("Using the first threshold only")
+    res <- summary_many_sim_one_thres(sim$sims, sim$n, sim$snr, crit, thres[1], digits, how)
+  }
+  if (length(unique(res$snr)) > 1) {
+    g <- res %>%
+      dplyr::mutate(snr = as.factor(!! sym("snr"))) %>%
+      ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("snr"))) +
+      geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
+      geom_path() + geom_point() +
+      labs(x="Sample size", y="Type I error rate/ Power") +
+      scale_colour_discrete(name = "SNR") +
+      facet_wrap(stats::as.formula("~test"))
+  } else {
+    g <- res %>%
+      ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("test"))) +
+      geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
+      geom_path() + geom_point() +
+      labs(x="Sample size", y="Type I error rate/ Power") +
+      scale_colour_discrete(name = " ")
+  }
+  return(g)
 }
 
 #' @export
@@ -287,24 +347,6 @@ summary_many_sim_one_thres <- function(sim, n, snr, crit, thres, digits, how) {
   res <- res %>%
     dplyr::mutate(n = n, snr = round(snr, 2)) %>%
     tidyr::pivot_longer(cols = -c("n", "snr", "thres"), names_to = "test", values_to = "power")
-  if (length(unique(res$snr)) > 1) {
-    g <- res %>%
-      dplyr::mutate(snr = as.factor(snr)) %>%
-      ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("snr"))) +
-      geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
-      geom_path() + geom_point() +
-      labs(x="Sample size", y="Type I error rate/ Power") +
-      scale_colour_discrete(name = "SNR") +
-      facet_wrap(stats::as.formula("~test"))
-  } else {
-    g <- res %>%
-      ggplot(aes(x = !! sym("n"), y = !! sym("power"), colour = !! sym("test"))) +
-      geom_hline(yintercept = 0.8, linetype = 2, colour = "grey") +
-      geom_path() + geom_point() +
-      labs(x="Sample size", y="Type I error rate/ Power") +
-      scale_colour_discrete(name = " ")
-  }
-  print(g)
   return(res)
 }
 
@@ -314,14 +356,6 @@ summary_one_sim_many_thres <- function(sim, crit, thres, digits, how) {
     res <- dplyr::bind_rows(res,
                             summary_one_sim_one_thres(sim, crit, thres[i], digits, how, pivot = T))
   }
-  g <- res %>%
-    ggplot(aes(x = !! sym("thres"), y = !! sym("power"),
-               group = !! sym("test"), color = !! sym("test"))) +
-    geom_hline(yintercept = 0.8, linetype = 2, colour = "gray") +
-    geom_point() + geom_path() +
-    labs(y = "Type I error rate/ Power", x = "Significance threshold") +
-    scale_colour_discrete(name = "")
-  print(g)
   return(res)
 }
 

@@ -20,8 +20,10 @@ binary, or count outcomes.}
 \item{f_args}{A named list of additional arguments to f}
 }
 \value{
-An OutcomeModel object. Attributes: f: mean function, sigma: a number
-  Gaussian observation noise, family: a string 'gaussian' or 'binomial'.
+An OutcomeModel object. Attributes:
+\item{f}{mean function.}
+\item{sigma}{a number for the Gaussian observation noise.}
+\item{family}{a string 'gaussian' or 'binomial'.}
 }
 \description{
 This function creates a generative model of the outcome given a matrix of

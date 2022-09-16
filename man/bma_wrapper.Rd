@@ -17,12 +17,11 @@ bma_wrapper(y, x, args = list())
 }
 \value{
 A list of vectors whose values are between 0 and 1
-\describe{
-  \item{beta}{The smaller posterior probability of the coefficients being to
-  one side of zero: min(Pr(beta >0), Pr(beta<0)).}
-  \item{pip}{PIP of the
-  effect not being zero.}
-  \item{time}{elapsed time to fit the model.} }
+\item{beta}{The smaller posterior probability of the coefficients being to
+one side of zero: min(Pr(beta >0), Pr(beta<0)).}
+\item{pip}{PIP of the
+effect not being zero.}
+\item{time}{elapsed time to fit the model.}
 }
 \description{
 Fits a linear model with Bayesian model selection with significance criteria:

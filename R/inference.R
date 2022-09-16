@@ -8,12 +8,15 @@
 #'
 #' @param model A string of the name of a built-in statistical model or a function
 #'   implements a statistical model and returns a list of significance
-#'   criteria for each predictor. Built-in options include 'bma', 'bkmr', 'ms',
+#'   criteria for each predictor. Built-in options include 'bma', 'bkmr', 'mixselect',
 #'   'bws', 'qgc', 'fin', 'glm'.
 #' @param name A string, name of the statistical model. Default to string input
 #'   of model.
 #' @param ... Additional keyword arguments for the statistical model
 #' @return An InferenceModel object.
+#' \item{model}{a function that takes matrices of predictors and outcomes and
+#' returns a list of significance criteria.}
+#' \item{model_name}{a string.}
 #' @examples
 #' imod <- mpower::InferenceModel(model = 'glm', family = 'gaussian',
 #' formula = y ~ Poverty*(poly(Age, 2) + HHIncome + HomeOwn + Education))
@@ -78,26 +81,22 @@ new_InferenceModel <- function(l = list()) {
 #' @param mod An InferenceModel object
 #' @param x A matrix of predictors
 #' @param y A vector of outcome
-#' @return A list of significance criteria
-#' \describe{
-#'   \item{beta}{The smaller
-#'   posterior probability of being to one side of zero for linear term, given
-#'   either the main effect or interaction is non-zero. Applicable to 'bma',
-#'   'bws', 'fin', and 'ms' model.}
-#'   \item{interact_beta}{Same as linear_beta but
-#'   for pair-wise interactions. Applicable to 'fin' model.}
-#'   \item{pip}{Posterior inclusion probability (PIP) of either a linear or
-#'   non-linear effect. Applicable to 'bma', 'bkmr', and 'ms' model.}
-#'   \item{group_pip}{PIP of either a linear or non-linear effect. Applicable to
-#'   'bkmr' model.}
-#'   \item{linear_pip}{PIP of a linear effect. Applicable to 'ms'
-#'   model.}
-#'   \item{gp_pip}{PIP of a non-linear effect. Applicable to 'ms'
-#'   model.}
-#'   \item{pval}{The p-value of the combined effect, the same for all
-#'   predictors. Applicable to 'glm', and 'qgc' model.}
-#'   \item{time}{elapsed time
-#'   to fit the model} }
+#' @return A list of some of the following significance criteria:
+#' \item{beta}{The smaller
+#' posterior probability of being to one side of zero for linear term, given
+#' either the main effect or interaction is non-zero. Applicable to 'bma',
+#' 'bws', 'fin', and 'mixselect' model.}
+#' \item{interact_beta}{Same as linear_beta but
+#' for pair-wise interactions. Applicable to 'fin' model.}
+#' \item{pip}{Posterior inclusion probability (PIP) of either a linear or
+#' non-linear effect. Applicable to 'bma', 'bkmr', and 'mixselect' model.}
+#' \item{group_pip}{PIP of either a linear or non-linear effect. Applicable to
+#' 'bkmr' model.}
+#' \item{linear_pip}{PIP of a linear effect. Applicable to 'mixselect' model.}
+#' \item{gp_pip}{PIP of a non-linear effect. Applicable to 'mixselect' model.}
+#' \item{pval}{The p-value of the combined effect, the same for all
+#' predictors. Applicable to 'glm', and 'qgc' model.}
+#' \item{time}{elapsed time to fit the model.}
 #' @export
 fit <- function(mod, x, y) {
     UseMethod("fit")
@@ -163,12 +162,10 @@ mixselect_wrapper <- function(y, x, args=list()) {
 #' @param y A vector of outcome
 #' @param args A list of arguments, see R function `bkmr::kmbayes()`
 #' @return A list of vectors whose values are between 0 and 1
-#' \describe{
-#'   \item{pip}{PIP for component-wise selection or conditional (with-in group)
-#'   PIP for hierarchical variable selection.}
-#'   \item{group_pip}{PIP for group-specific selection.}
-#'   \item{time}{elapsed time to fit the model.}
-#' }
+#' \item{pip}{PIP for component-wise selection or conditional (with-in group)
+#' PIP for hierarchical variable selection.}
+#' \item{group_pip}{PIP for group-specific selection.}
+#' \item{time}{elapsed time to fit the model.}
 #' @section Reference:
 #'
 #'   Bobb JF, Henn BC, Valeri L, Coull BA (2018). “Statistical software for
@@ -201,12 +198,11 @@ bkmr_wrapper <- function(y, x, args = list()) {
 #' @param y A vector of outcome
 #' @param args A list of arguments see R function `BMA::bic.glm()`.
 #' @return A list of vectors whose values are between 0 and 1
-#' \describe{
-#'   \item{beta}{The smaller posterior probability of the coefficients being to
-#'   one side of zero: min(Pr(beta >0), Pr(beta<0)).}
-#'   \item{pip}{PIP of the
-#'   effect not being zero.}
-#'   \item{time}{elapsed time to fit the model.} }
+#' \item{beta}{The smaller posterior probability of the coefficients being to
+#' one side of zero: min(Pr(beta >0), Pr(beta<0)).}
+#' \item{pip}{PIP of the
+#' effect not being zero.}
+#' \item{time}{elapsed time to fit the model.}
 #' @section Reference:
 #'
 #'   Raftery A, Hoeting J, Volinsky C, Painter I, Yeung KY (2021).BMA: Bayesian
@@ -234,16 +230,14 @@ bma_wrapper <- function(y, x, args = list()) {
 #' @param args A list of arguments see R function
 #'   `infinitefactor::interactionDL()` in 'infinitefactor' package.
 #' @return A list of vectors whose values are between 0 and 1
-#' \describe{
-#'   \item{beta}{The smallest posterior probability of the coefficients being to
-#'   one side of zero for either main effect or interaction: min(Pr(beta >0),
-#'   Pr(beta<0)).}
-#'   \item{linear_beta}{The smaller of posterior probability of
-#'   the main effects being to one side of zero.}
-#'   \item{interact_beta}{Same as
-#'   linear_beta but for pair-wise interactions.}
-#'   \item{time}{elapsed time to
-#'   fit the model.} }
+#' \item{beta}{The smallest posterior probability of the coefficients being to
+#' one side of zero for either main effect or interaction: min(Pr(beta >0),
+#' Pr(beta<0)).}
+#' \item{linear_beta}{The smaller of posterior probability of
+#' the main effects being to one side of zero.}
+#' \item{interact_beta}{Same as
+#' linear_beta but for pair-wise interactions.}
+#' \item{time}{elapsed time to fit the model.}
 #' @section Reference:
 #'
 #'   Ferrari F, Dunson DB (2020). “Bayesian factor analysis for inference on
@@ -283,12 +277,11 @@ fin_wrapper <- function(y, x, args = list(nrun = 2000)) {
 #' @param y A vector of outcome
 #' @param args A list of arguments see R function `qgcomp::qgcomp.noboot()`.
 #' @return A list
-#' \describe{
-#'   \item{pval}{The p-value of the combined effect, the
-#'   same for all predictors.}
-#'   \item{pos_weights}{Positive weights. See 'qgcomp' package.}
-#'   \item{neg_weights}{Negative weights. See 'qgcomp' package.}
-#'   \item{time}{elapsed time to fit the model.} }
+#' \item{pval}{The p-value of the combined effect, the
+#' same for all predictors.}
+#' \item{pos_weights}{Positive weights. See 'qgcomp' package.}
+#' \item{neg_weights}{Negative weights. See 'qgcomp' package.}
+#' \item{time}{elapsed time to fit the model.}
 #' @section Reference:
 #'
 #'   Keil AP, Buckley JP, O’Brien KM, Ferguson KK, Zhao S, White AJ (2020). “A
@@ -313,10 +306,8 @@ qgcomp_lin_wrapper <- function(y, x, args = list()) {
 #' @param y A vector of outcome
 #' @param args A list of arguments see R `glm` function.
 #' @return A list
-#' \describe{
-#'   \item{pval}{The p-value of the linear main effect.}
-#'   \item{time}{elapsed time to fit the model.}
-#' }
+#' \item{pval}{The p-value of the linear main effect.}
+#' \item{time}{elapsed time to fit the model.}
 #' @export
 glm_wrapper <- function(y, x, args = list()) {
     if (is.null(args[["formula"]])) {
@@ -327,14 +318,15 @@ glm_wrapper <- function(y, x, args = list()) {
     s <- Sys.time()
     fit <- do.call(stats::glm, c(list(data = dat), args))
     time <- Sys.time() - s
-    p <- ncol(x)
+    var_names <- colnames(fit$model)[-1]
+    p <- length(var_names)
     all_pval <- stats::summary.glm(fit)$coef[, 4]
     all_int_pval <- all_pval[grepl("\\:", names(all_pval))]
     all_main_pval <- all_pval[!grepl("\\:", names(all_pval))]
     pval <- int_pval <- main_pval <- rep(NA, p)
-    names(pval) <- names(int_pval) <- names(main_pval) <- colnames(x)
+    names(pval) <- names(int_pval) <- names(main_pval) <- var_names
     # Save the smallest p-value of all terms with the variable name
-    for (var in colnames(x)) {
+    for (var in var_names) {
         int_pval[var] <- min(all_int_pval[grepl(var, names(all_int_pval))])
         main_pval[var] <- min(all_main_pval[grepl(var, names(all_main_pval))])
         pval[var] <- min(int_pval[var], main_pval[var])
@@ -347,13 +339,12 @@ glm_wrapper <- function(y, x, args = list()) {
 #' @param y A vector of outcome
 #' @param args A list of arguments see R `bws::bws()`` function.
 #' @return A list
-#' \describe{
-#'   \item{beta}{The smaller posterior probability of
-#'   the combined overall effect being to one side of zero: min(Pr(beta >0),
-#'   Pr(beta<0)). The same for all predictor.}
-#'   \item{weights}{The 95\% CI of the
-#'   contribution of each predictor to the overall effect. Between 0 and 1.}
-#'   \item{time}{elapsed time to fit the model.} }
+#' \item{beta}{The smaller posterior probability of
+#' the combined overall effect being to one side of zero: min(Pr(beta >0),
+#' Pr(beta<0)). The same for all predictor.}
+#' \item{weights}{The 95\% CI of the
+#' contribution of each predictor to the overall effect. Between 0 and 1.}
+#' \item{time}{elapsed time to fit the model.}
 #' @section Reference:
 #'
 #'   Hamra GB, MacLehose RF, Croen L, Kauffman EM, Newschaffer C (2021).

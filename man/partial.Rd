@@ -13,6 +13,9 @@ partial(r, x, y)
 
 \item{y}{A vector of indices}
 }
+\value{
+A partial correlation matrix
+}
 \description{
 Partial correlations between elements in x and elements in y
 }

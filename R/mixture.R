@@ -1,4 +1,3 @@
-# TODO: convert genx data to be numeric or factor depending on the input data.
 #' Correlated predictors generator
 #'
 #' This function creates a generative model for the correlated, mixed-scale
@@ -41,7 +40,7 @@
 #'   univariate marginals include: `qbeta` , `qbinom`, `qcauchy`, `qchisq`, `qexp`, `qf`,
 #'   `qgamma`, `qgeom`, `qhyper`, `qlogis`, `qlnorm`, `qmultinom`, `qnbinom`,
 #'   `qnorm`, `qpois`, `qt`, `qunif`, `qweibull`.
-#'
+#' @return A MixtureModel object.
 #' @examples
 #' data("nhanes1518")
 #' xmod <- mpower::MixtureModel(nhanes1518, method = "resampling")
@@ -114,19 +113,11 @@ new_estimation_MixtureModel <- function(data = numeric(), nudge = numeric(), var
         stop("Data must be numeric only. Convert ordinal factors to integer or
     use One-hot-encoding.")
     }
-    cat("\nEstimating the joint distribution using sbgcop\n")
+    message("\nEstimating the joint distribution using sbgcop\n")
     sbgcop_fit <- do.call(sbgcop::sbgcop.mcmc, c(list(Y = data), args))
-    cat("\n*** MCMC Summary ***")
-    cat("\nNumber of samples", sbgcop::summary.psgc(sbgcop_fit)$nsamp)
-    cat("\nEffective sample sizes")
-    print(sbgcop::summary.psgc(sbgcop_fit)$ESS)
-    # cat('\nSummary plots for univariate marginals, pair-wise correlation and
-    # regression parameters.') { sbgcop::plot.psgc(sbgcop_fit)
-    # mtext('Univariate marignals (left), pairwise correlation (middle),
-    # pairwise regression parameter (right)', outer = T, cex = 0.7) }
     R <- sbgcop_fit$C.psamp
     x <- list(data = data, R = R, var_name = var_name, var_dtypes = var_dtypes, p = ncol(data),
-        nudge = nudge)
+        nudge = nudge, sbgcop_summary = sbgcop::summary.psgc(sbgcop_fit))
     structure(x, class = "mpower_estimation_MixtureModel")
 }
 
@@ -217,6 +208,7 @@ genx.mpower_cvine_MixtureModel <- function(obj, n) {
 #' Quantile function for the multinomial distribution, size = 1
 #' @param p A quantile.
 #' @param probs A vector of probabilities for each level.
+#' @return Gives the quantile function
 #' @export
 qmultinom <- function(p, probs) {
     stopifnot(all(probs < 1) & all(probs > 0))
@@ -229,7 +221,7 @@ qmultinom <- function(p, probs) {
 #' @param obj A MixtureModel object.
 #' @param split A logical, whether to display numbers on half of the covariance
 #' matrix.
-#' @return ggplot2 graphics.
+#' @return A 'ggplot2' graphics.
 #' @export
 mplot <- function(obj, split = TRUE) {
     UseMethod("mplot")
@@ -238,10 +230,25 @@ mplot <- function(obj, split = TRUE) {
 #' @export
 mplot.mpower_resampling_MixtureModel <- function(obj, split = TRUE) {
     g1 <- plot_marginals(obj$data)
-    # C <- cor(genx(obj, 200), method = 'spearman') g2 <- plot_corr(C,
-    # split=FALSE, title = 'Spearman correlations of 200 resampled
-    # observations')
-    return(g1)
+    if (!is.numeric(as.matrix(obj$data))) {
+        warning("Data must be numeric only to plot correlation matrix. Convert ordinal factors to integer or
+    use One-hot-encoding.")
+    } else{
+        g2 <- stats::cor(obj$data, method = "spearman") %>%
+            reshape2::melt() %>%
+            ggplot(aes(!!sym("Var2"), !!sym("Var1"), fill = !!sym("value"))) +
+            geom_tile() +
+            scale_fill_gradient2(low = "#0072B2", mid = "white", high = "#d55E00",
+                limit = c(-1, 1), name = "Spearman\nCorrelation") +
+            theme(plot.title = element_text(hjust = 0.5),
+                  axis.text.x = element_text(angle = 90),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  panel.background = element_blank()) +
+            coord_fixed() + labs(x = "", y = "", title = "Spearman correlation matrix of original data")
+        return(list(hist = g1, corr = g2))
+    }
+    return(list(hist = g1))
 }
 
 #' @export
@@ -297,7 +304,7 @@ plot_corr <- function(C, title = "", split = TRUE) {
         return(g)
     }
     upper_C <- lower_C <- C
-    upper_C[lower.tri(C, diag = T)] <- NA
+    upper_C[lower.tri(C)] <- NA
     lower_C[upper.tri(C)] <- NA
     meltNum <- reshape2::melt(lower_C, na.rm = T)
     meltColor <- reshape2::melt(upper_C, na.rm = T)

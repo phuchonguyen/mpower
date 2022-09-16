@@ -11,6 +11,9 @@ qmultinom(p, probs)
 
 \item{probs}{A vector of probabilities for each level.}
 }
+\value{
+Gives the quantile function
+}
 \description{
 Quantile function for the multinomial distribution, size = 1
 }

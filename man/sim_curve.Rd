@@ -46,7 +46,6 @@ parallel-processing clusters.}
 }
 \value{
 A SimCurve object with the following attributes:
-\describe{
   \item{s}{a number of simulations.}
   \item{snr}{a real number or array of real numbers for SNR of each OutcomeModel.}
   \item{n}{a number or vector of sample sizes.}
@@ -54,7 +53,6 @@ A SimCurve object with the following attributes:
   \item{ymod}{the OutcomeModel used.}
   \item{imod}{the InferenceModel used.}
   \item{sims}{a list of simulation output matrices.}
-}
 }
 \description{
 This function can be used to create power curves by calling sim_power() on
@@ -70,6 +68,7 @@ bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP +
 0.1*URXCOP*URXECP", family = "binomial")
 logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-s=100, n=c(500, 1000), cores=1, snr_iter=2000)
+s=50, n=c(500, 1000), cores=2, snr_iter=1000)
 logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
+plot_summary(logit_out, crit="pval", thres=0.05, how="lesser")
 }

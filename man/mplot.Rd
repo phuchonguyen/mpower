@@ -13,7 +13,7 @@ mplot(obj, split = TRUE)
 matrix.}
 }
 \value{
-ggplot2 graphics.
+A 'ggplot2' graphics.
 }
 \description{
 Visualize marginals and Gaussian copula correlations of simulated data

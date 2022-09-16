@@ -41,6 +41,9 @@ of each predictor. See Details.}
 
 \item{resamp_prob}{A vector of sampling probability for each observation in data. Must sums to 1.}
 }
+\value{
+A MixtureModel object.
+}
 \description{
 This function creates a generative model for the correlated, mixed-scale
 predictors.

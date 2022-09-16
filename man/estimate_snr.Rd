@@ -4,7 +4,7 @@
 \alias{estimate_snr}
 \title{Monte Carlo approximation of the SNR}
 \usage{
-estimate_snr(ymod, xmod, m = 5000)
+estimate_snr(ymod, xmod, m = 5000, R = 100)
 }
 \arguments{
 \item{ymod}{A OutcomeModel object}
@@ -12,9 +12,11 @@ estimate_snr(ymod, xmod, m = 5000)
 \item{xmod}{A MixtureModel object}
 
 \item{m}{Number of MC samples}
+
+\item{R}{Number of bootstrap replicates}
 }
 \value{
-An estimate SNR
+An estimate SNR and 95-percent CI.
 }
 \description{
 Monte Carlo approximation of the SNR

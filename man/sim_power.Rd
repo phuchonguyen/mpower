@@ -45,7 +45,6 @@ verbatim in the output (pass), or terminate the loop (stop). Default is
 }
 \value{
 A PowerSim object. Attributes:
-\describe{
   \item{s}{a number of simulations.}
   \item{snr}{a real number for SNR of the OutcomeModel.}
   \item{n}{a number of sample sizes.}
@@ -53,7 +52,6 @@ A PowerSim object. Attributes:
   \item{ymod}{the OutcomeModel used.}
   \item{imod}{the InferenceModel used.}
   \item{sims}{an output matrices.}
-}
 }
 \description{
 Power analysis using Monte Carlo simulation
@@ -68,6 +66,7 @@ bmi_mod <- mpower::OutcomeModel(f = "0.2*URXCNP + 0.15*URXECP +
 0.1*URXCOP*URXECP", family = "binomial")
 logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 logit_out <- mpower::sim_power(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-s=100, n=2000, cores=1, snr_iter=2000)
+s=100, n=2000, cores=2, snr_iter=2000)
 logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
+plot_summary(logit_out, crit="pval", thres=0.05, how="lesser")
 }

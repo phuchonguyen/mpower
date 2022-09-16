@@ -14,26 +14,22 @@ fit(mod, x, y)
 \item{y}{A vector of outcome}
 }
 \value{
-A list of significance criteria
-\describe{
-  \item{beta}{The smaller
-  posterior probability of being to one side of zero for linear term, given
-  either the main effect or interaction is non-zero. Applicable to 'bma',
-  'bws', 'fin', and 'ms' model.}
-  \item{interact_beta}{Same as linear_beta but
-  for pair-wise interactions. Applicable to 'fin' model.}
-  \item{pip}{Posterior inclusion probability (PIP) of either a linear or
-  non-linear effect. Applicable to 'bma', 'bkmr', and 'ms' model.}
-  \item{group_pip}{PIP of either a linear or non-linear effect. Applicable to
-  'bkmr' model.}
-  \item{linear_pip}{PIP of a linear effect. Applicable to 'ms'
-  model.}
-  \item{gp_pip}{PIP of a non-linear effect. Applicable to 'ms'
-  model.}
-  \item{pval}{The p-value of the combined effect, the same for all
-  predictors. Applicable to 'glm', and 'qgc' model.}
-  \item{time}{elapsed time
-  to fit the model} }
+A list of some of the following significance criteria:
+\item{beta}{The smaller
+posterior probability of being to one side of zero for linear term, given
+either the main effect or interaction is non-zero. Applicable to 'bma',
+'bws', 'fin', and 'mixselect' model.}
+\item{interact_beta}{Same as linear_beta but
+for pair-wise interactions. Applicable to 'fin' model.}
+\item{pip}{Posterior inclusion probability (PIP) of either a linear or
+non-linear effect. Applicable to 'bma', 'bkmr', and 'mixselect' model.}
+\item{group_pip}{PIP of either a linear or non-linear effect. Applicable to
+'bkmr' model.}
+\item{linear_pip}{PIP of a linear effect. Applicable to 'mixselect' model.}
+\item{gp_pip}{PIP of a non-linear effect. Applicable to 'mixselect' model.}
+\item{pval}{The p-value of the combined effect, the same for all
+predictors. Applicable to 'glm', and 'qgc' model.}
+\item{time}{elapsed time to fit the model.}
 }
 \description{
 Fits the model to given data and gets a list of significance criteria
