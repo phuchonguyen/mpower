@@ -37,7 +37,7 @@
 #' 0.1*URXCOP*URXECP", family = "binomial")
 #' logit_mod <- mpower::InferenceModel(model = "glm", family = "binomial")
 #' logit_out <- mpower::sim_curve(xmod=chems_mod, ymod=bmi_mod, imod=logit_mod,
-#' s=50, n=c(500, 1000), cores=2, snr_iter=1000)
+#' s=20, n=c(500, 1000), cores=2, snr_iter=1000)
 #' logit_df <- summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' plot_summary(logit_out, crit="pval", thres=0.05, how="lesser")
 #' @export
@@ -176,7 +176,7 @@ sim_power <- function(xmod,
   } else {
     # Set up parallel backend to use many processors
     cores_max <- parallel::detectCores()
-    cl <- snow::makeCluster(min(cores_max[1]-1, cores))
+    cl <- snow::makeCluster(min(cores_max-1, cores), type="SOCK")
     snow::clusterExport(cl, c(c("genx", "geny", "fit"), cluster_export))
     doSNOW::registerDoSNOW(cl)
     opts <- list(progress=progress)
