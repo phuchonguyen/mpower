@@ -29,12 +29,18 @@ wide variety of settings.
 
 ## Installation
 
-And the development version from
-[GitHub](https://github.com/phuchonguyen/mpower) with:
+Install the stable version from CRAN
+
+```r
+install.packages("mpower")
+```
+
+And the development version with MixSelect from
+[GitHub](https://github.com/phuchonguyen/mpower/tree/mixselect) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("phuchonguyen/mpower")
+devtools::install_github("phuchonguyen/mpower", ref="mixselect")
 ```
 
 ## Tutorial
