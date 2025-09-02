@@ -243,7 +243,7 @@ The model `lm_demo` is defined in the global environment, outside the scope of t
 ```{r resamp-curve, results='hide', fig.keep='all'}
 curve <- mpower::sim_curve(xmod, ymod, imod,
     s = 200, n = seq(1000, 5000, 1000),
-    cores = 2, errorhandling = "remove", snr_iter = 5000,
+    cores = 2, errorhandling = "stop", snr_iter = 5000,
     cluster_export = c("lm_demo"))
 ```
 
@@ -282,7 +282,9 @@ Similar to BWS but is a frequentist method. The significance criterion is the p-
 ```{r qg-test, results='hide', fig.keep='all', eval=F}
 qgcomp_imod <- mpower::InferenceModel(model="qgc")
 qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ```{r, include=F, eval=F}
@@ -294,7 +296,9 @@ temp_df <- summary(qg_power, "pval", 0.05, how = "lesser")
 ```{r fin-test, results='hide', fig.keep='all', eval=F}
 fin_imod <- InferenceModel(model="fin", nrun = 2000, verbose=F)
 fin_power <- sim_power(xmod, ymod, fin_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ```{r, include=F, eval=F}
@@ -306,7 +310,9 @@ temp_df <- summary(fin_power, "beta", 0.05, how = "lesser")
 ```{r bma-test, results='hide', fig.keep='all', eval=F}
 bma_imod <- InferenceModel(model="bma", glm.family = "gaussian")
 bma_power <- sim_power(xmod, ymod, bma_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ```{r, include=F, eval=F}
@@ -318,7 +324,9 @@ temp_df <- summary(bma_power, "pip", 0.5, how = "greater")
 ```{r bkmr-test, results='hide', fig.keep='all', eval=F}
 bkmr_imod <- InferenceModel(model = "bkmr", iter = 5000, verbose = F)
 bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ```{r, include=F, eval=F}

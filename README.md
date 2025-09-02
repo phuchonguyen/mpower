@@ -55,22 +55,22 @@ library(ggplot2)
 
 To do power analysis using Monte Carlo simulations, we’ll need:
 
--   A generative model for the predictors. The predictors can be
-    correlated and mixed-scaled. Use `MixtureModel()`.
+- A generative model for the predictors. The predictors can be
+  correlated and mixed-scaled. Use `MixtureModel()`.
 
--   A generative model for the outcome that describes the “true”
-    relationships between the predictors and outcome. Use
-    `OutcomeModel()`.
+- A generative model for the outcome that describes the “true”
+  relationships between the predictors and outcome. Use
+  `OutcomeModel()`.
 
--   An inference model. Ideally, this would be the same as the
-    generative model for the outcome. However, in practice our model can
-    at best approximate the “true” predictor-outcome relationships. Use
-    `InferenceModel()`.
+- An inference model. Ideally, this would be the same as the generative
+  model for the outcome. However, in practice our model can at best
+  approximate the “true” predictor-outcome relationships. Use
+  `InferenceModel()`.
 
--   A “significance” criterion and threshold for the inference model.
-    For instance, the t-test in a linear regression has its p-value as
-    the “significance” criterion, and a common threshold for statistical
-    significance is p-value less than 0.05.
+- A “significance” criterion and threshold for the inference model. For
+  instance, the t-test in a linear regression has its p-value as the
+  “significance” criterion, and a common threshold for statistical
+  significance is p-value less than 0.05.
 
 ### Example 1: Power curve
 
@@ -303,7 +303,7 @@ using parallelism.
 ``` r
 curve <- mpower::sim_curve(xmod, ymod, imod,
     s = 200, n = seq(1000, 5000, 1000),
-    cores = 2, errorhandling = "remove", snr_iter = 5000,
+    cores = 2, errorhandling = "stop", snr_iter = 5000,
     cluster_export = c("lm_demo"))
 ```
 
@@ -379,7 +379,9 @@ is the p-value.
 ``` r
 qgcomp_imod <- mpower::InferenceModel(model="qgc")
 qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ###### Bayesian factor analysis with interactions
@@ -387,7 +389,9 @@ qg_power <- mpower::sim_power(xmod, ymod, qgcomp_imod, s = 100, n = 1000,
 ``` r
 fin_imod <- InferenceModel(model="fin", nrun = 2000, verbose=F)
 fin_power <- sim_power(xmod, ymod, fin_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ###### Bayesian model averaging
@@ -395,7 +399,9 @@ fin_power <- sim_power(xmod, ymod, fin_imod, s = 100, n = 1000,
 ``` r
 bma_imod <- InferenceModel(model="bma", glm.family = "gaussian")
 bma_power <- sim_power(xmod, ymod, bma_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ###### Bayesian kernel machine regression
@@ -403,7 +409,9 @@ bma_power <- sim_power(xmod, ymod, bma_imod, s = 100, n = 1000,
 ``` r
 bkmr_imod <- InferenceModel(model = "bkmr", iter = 5000, verbose = F)
 bkmr_power <- sim_power(xmod, ymod, bkmr_imod, s = 100, n = 1000,
-                       cores=2, snr_iter=1000, errorhandling = "remove")
+                       cores=2, snr_iter=1000, errorhandling = "stop",
+                       cluster_export = c("lm_demo")
+                       )
 ```
 
 ### Example 4: Logistic regression example
